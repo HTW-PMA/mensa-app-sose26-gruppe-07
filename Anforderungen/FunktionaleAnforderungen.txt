@@ -1,0 +1,58 @@
+Technische Implementierung
+Die folgenden Punkte bilden die Grundlage für die Bewertung eurer App-Projekte.
+Sie sind in drei Kategorien gegliedert: Funktionale Anforderungen, Qualitätsanforderungen und Technische Hinweise.
+
+Jeder Anforderungspunkt ist nach einem einheitlichen Schema aufgebaut:
+
+Zuerst wird beschrieben, was gefordert ist.
+Anschließend zeigt ein Pfeil (→), warum diese Anforderung wichtig ist oder welchen Mehrwert sie bietet.
+In kursiver Schrift findet ihr bei einigen Punkten eine Referenz zu einer Vorlesungseinheit, in der das Thema behandelt wurde.
+
+Diese Anforderungen sind verbindlich und müssen im Projekt umgesetzt werden. Sie stellen sicher, dass eure App sowohl funktional als auch qualitativ den Erwartungen entspricht und technisch sauber umgesetzt ist.
+
+
+Funktionale Anforderungen
+
+1. App-Identität
+
+Die App besitzt einen individuellen Namen und ein passendes Icon, das zum Thema und zur Zielgruppe passt.
+→ Die App soll einen wiedererkennbaren Charakter haben.
+
+2. Übersicht & Navigation
+
+Es gibt eine übersichtliche Darstellung über alle verfügbaren Mensen in Berlin.
+→ Nutzer:innen können sich leicht orientieren und gewünschte Informationen finden.
+
+Grundbausteine einer App, Mensa API
+
+3. Speiseinformationen
+
+Nutzer:innen können die angebotenen Speisen und Preise in einer verständlichen, aktuellen und informativen Darstellung einsehen.
+→ So erhalten sie transparente Informationen und können fundierte Entscheidungen treffen, wo und was sie essen möchten.
+
+Grundbausteine einer App, Mensa API
+
+4. Personalisierung
+
+Einstellungen oder Präferenzen (z. B. Lieblingsmensa oder Lieblingsspeisen) können gespeichert werden.
+→ Dadurch wird die App persönlicher und spart den Nutzer:innen Zeit bei wiederholter Nutzung.
+
+5. Zusatzinformationen
+
+Hinweise zu Inhaltsstoffen oder Allergenen sind verfügbar.
+→ Die App hilft Nutzer:innen, informierte Entscheidungen zu treffen.
+
+6. Künstliche Intelligenz
+
+Die App muss verpflichtend ein KI-basiertes Feature enthalten, das ausschließlich mit Prolog umgesetzt wird. Andere KI-Technologien oder Systeme sind nicht zulässig.
+Die KI muss eigenständig logische Schlussfolgerungen auf Basis definierter Fakten und Regeln ableiten. Reine statische Wenn-Dann-Logik erfüllt diese Anforderung nicht.
+→ So entsteht ein zusätzlicher Nutzen für die Nutzer:innen und die App hebt sich durch innovative Funktionalität von klassischen Anwendungen ab.
+
+KI in der App
+
+7. Benachrichtigungen oder Erinnerungen
+
+Die App kann Nutzer:innen aktiv informieren oder erinnern.
+→ Ziel ist, die App nützlicher im Alltag zu machen.
+
+Push Notifications

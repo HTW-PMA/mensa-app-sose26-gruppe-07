@@ -1,0 +1,25 @@
+
+Die Prüfungsaufgabe:
+Im Rahmen dieser Veranstaltung arbeitet ihr in Vierergruppen an der Konzeption, dem Design und der technischen Umsetzung einer mobilen Anwendung.
+Ziel ist die Entwicklung einer individuellen Version einer Mensa-App, in der ihr die zentralen Themen des Kurses praktisch umsetzt – von der Ideenfindung über die Gestaltung bis zur finalen Implementierung.
+
+Das Abschlussprojekt bildet den zentralen Bestandteil der Prüfung und setzt sich aus drei miteinander verbundenen Bereichen zusammen:
+
+1. Designkonzept
+2. Technische Implementierung
+3. Projektpräsentation
+
+Umfang & Umsetzung:
+
+1. Jede Gruppe entwickelt eine eigenständige mobile Anwendung, die auf den im Folgenden beschriebenen Anforderungen basiert.
+2. Der Entwicklungsprozess wird durchgehend über Git dokumentiert. Euer Fortschritt ist regelmäßig im jeweiligen GitHub-Classroom-Repository festzuhalten.
+3. Am Prüfungstag präsentiert jede Gruppe ihr Ergebnis im Rahmen einer Live-Präsentation.
+
+Projektziele im Überblick:
+
+Eure App soll folgende Bestandteile enthalten:
+
+1. Pflichtanforderungen – Ein festgelegter Katalog an funktionalen und qualitativen Anforderungen, den jede Gruppe vollständig umsetzen muss.
+
+2. Designkonzept mit Nutzertests – Ein auf eurer Zielgruppe basierendes UI-/UX-Design, das durch User Research oder Nutzertests belegt wird und zumindest in Teilen umgesetzt wird.
+Pe

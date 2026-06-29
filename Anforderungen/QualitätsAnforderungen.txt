@@ -1,0 +1,60 @@
+Technische Implementierung
+Die folgenden Punkte bilden die Grundlage für die Bewertung eurer App-Projekte.
+Sie sind in drei Kategorien gegliedert: Funktionale Anforderungen, Qualitätsanforderungen und Technische Hinweise.
+
+Jeder Anforderungspunkt ist nach einem einheitlichen Schema aufgebaut:
+
+Zuerst wird beschrieben, was gefordert ist.
+Anschließend zeigt ein Pfeil (→), warum diese Anforderung wichtig ist oder welchen Mehrwert sie bietet.
+In kursiver Schrift findet ihr bei einigen Punkten eine Referenz zu einer Vorlesungseinheit, in der das Thema behandelt wurde.
+
+Diese Anforderungen sind verbindlich und müssen im Projekt umgesetzt werden. Sie stellen sicher, dass eure App sowohl funktional als auch qualitativ den Erwartungen entspricht und technisch sauber umgesetzt ist.
+
+Qualitätsanforderungen
+
+1. Code-Struktur & Wiederverwendung
+
+Der Code ist logisch aufgebaut, gut lesbar und fördert Wiederverwendung durch klar gegliederte Module, Komponenten oder Funktionen.
+→ So bleibt das Projekt übersichtlich, leichter wartbar und kann bei zukünftigen Entwicklungen effizient erweitert werden.
+
+Funktionale Komponenten, Hooks
+
+2. Zustands- und Logikverwaltung
+
+Zustände und Datenflüsse sind konsistent und klar nachvollziehbar.
+→ Die App verhält sich zuverlässig bei Nutzerinteraktionen.
+
+State Management
+
+3. Offline-Fähigkeit
+
+Die App funktioniert in Grundzügen auch ohne Internet (durch lokale Speicherung).
+→ Sie bleibt benutzbar, auch wenn externe Dienste ausfallen.
+
+Datenspeicherung
+
+4. Fehlerbehandlung & Stabilität
+
+Die App reagiert robust auf Probleme und zeigt verständliche Fehlermeldungen.
+→ Sie bleibt funktionsfähig oder informiert den Nutzer angemessen.
+
+5. Versionshistorie
+
+Commits sind sinnvoll getrennt und mit aussagekräftigen Nachrichten versehen
+(z. B. “Implementiere Speichern der Lieblingsmensa” gemäß Linus-Torvalds-Konvention).
+→ Der Fortschritt ist klar dokumentiert, und Änderungen lassen sich gezielt nachverfolgen.
+
+6. Dokumentation
+
+Eine kurze, verständliche Dokumentation (z. B. README-Datei) beschreibt Installation, Nutzung und besondere Hinweise zur App
+→ Dadurch können wir das Projekt leichter testen.
+
+7. Benennung & Lesbarkeit
+
+Variablen, Komponenten und Funktionen sind klar benannt und folgen einem konsistenten Stil.
+→ Der Code ist auch für Dritte leicht verständlich.
+
+8. Sicherheitsaspekte
+
+Sensible Daten wie API-Keys oder Tokens sind sicher eingebunden und dürfen nicht öffentlich (in GitHub) einsehbar sein.
+→ So werden vertrauliche Informationen geschützt und Sicherheitsrisiken im Projekt vermieden.

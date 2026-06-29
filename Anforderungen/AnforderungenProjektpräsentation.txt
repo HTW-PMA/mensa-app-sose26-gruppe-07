@@ -1,0 +1,41 @@
+Projektpräsentation
+
+Die Prüfung erfolgt live am offiziellen Prüfungstag. Jede Gruppe präsentiert ihre entwickelte Mensa-App in einem Zeitfenster von 15 Minuten. Die Gestaltung dieser 15 Minuten ist euch überlassen – nutzt die Zeit voll aus und gleichzeitig überzieht diese bitte nicht.
+
+Anschließend findet eine 5-10 minütige Fragerunde durch die Prüfer statt. Dort können auch Fragen über den Code gestellt werden, stellt also sicher, dass ihr euren eigenen Code versteht, selbst wenn er mit KI genertiert ist.
+
+Wichtig: Jede Gruppe präsentiert allein und ohne Zuschauer:innen. Es ist nicht erlaubt, bei den Präsentationen anderer Gruppen zuzuschauen. Dies dient dem fairen Ablauf und soll jede Gruppe gleichermaßen konzentriert und unvoreingenommen präsentieren lassen.
+
+Ablauf & Inhalte der Präsentation:
+
+-Jedes Gruppenmitglied soll in etwa gleich viel Redezeit übernehmen.
+-Zeigt klar und strukturiert, welche Basis-Features ihr umgesetzt habt und wie diese in euer Designkonzept integriert wurden.
+-Führt eine Live-Demo eurer App durch.
+-Berichtet dabei auch über technische Herausforderungen und wie ihr sie gelöst habt.
+-Eine strukturierte Präsentation folgt einem erkennbaren roten Faden.
+
+Relevanz & Nutzerzentrierung zeigen:
+
+-Macht deutlich, warum eure Lösung für die Zielgruppe relevant ist.
+-Zeigt, wie ihr diese Relevanz geprüft habt, z. B. durch:
+    -Nutzerinterviews
+    -Tests mit realen Nutzer:innen
+    -Feedback zu Screendesigns
+-Stellt den Mehrwert gegenüber bestehenden Lösungen heraus.
+-Belegt eure Aussagen möglichst mit konkreten Beispielen, Tests oder Ergebnissen.
+
+Argumentation & Bewertungskriterien:
+
+Eure Argumentation ist frei gestaltbar – aber sie sollte:
+    -kurz, nachvollziehbar und zielgerichtet sein.
+    -irrelevante Details weglassen und den Fokus auf das Wesentliche legen.
+    -sich auf aussagekräftige Argumente stützen – sei es in Bezug auf:
+        -Usability
+        -wirtschaftliche Vorteile
+        -Effizienz oder Zukunftspotenzial
+
+Design vs. Umsetzung klar trennen
+
+-Vor der Live-Demo könnt ihr euer Designkonzept kurz zeigen, um die Entwicklung eurer Idee und des Designs im Verlauf des Projekts zu veranschaulichen.
+-Euer Designkonzept darf auch Funktionen oder Ideen enthalten, die nicht umgesetzt wurden – wichtig ist, dass diese klar als konzeptionell gekennzeichnet und von der tatsächlichen Implementierung abgegrenzt sind.
+-So wird deutlich, wie sich euer ursprüngliches Konzept zur finalen App entwickelt hat und wie ihr kreative Ansätze in die technische Umsetzung überführt habt.

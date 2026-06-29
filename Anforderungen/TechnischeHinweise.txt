@@ -1,0 +1,42 @@
+
+Technische Implementierung
+Die folgenden Punkte bilden die Grundlage für die Bewertung eurer App-Projekte.
+Sie sind in drei Kategorien gegliedert: Funktionale Anforderungen, Qualitätsanforderungen und Technische Hinweise.
+
+Jeder Anforderungspunkt ist nach einem einheitlichen Schema aufgebaut:
+
+Zuerst wird beschrieben, was gefordert ist.
+Anschließend zeigt ein Pfeil (→), warum diese Anforderung wichtig ist oder welchen Mehrwert sie bietet.
+In kursiver Schrift findet ihr bei einigen Punkten eine Referenz zu einer Vorlesungseinheit, in der das Thema behandelt wurde.
+
+Diese Anforderungen sind verbindlich und müssen im Projekt umgesetzt werden. Sie stellen sicher, dass eure App sowohl funktional als auch qualitativ den Erwartungen entspricht und technisch sauber umgesetzt ist.
+
+Technische Hinweise
+
+Implementierung & Quellcode:
+
+Der vollständige Quellcode muss im jeweiligen Gruppen-Repository auf GitHub hochgeladen werden. Nutzt dazu den GitHub Classroom-Link in Moodle. Namensschema für das Repository: WiSe25/26-Gruppe-XX (z. B. WiSe25/26-Gruppe-01).
+
+Mensa-API:
+
+Ein zentrales Element eurer App ist der Zugriff auf alle Berliner Mensen und ihre aktuellen Speisepläne – diese werden über eine bestehende API eines ehemaligen Kursteilnehmers bereitgestellt.
+
+API-Endpunkt: https://mensa.gregorflachs.de/
+
+Um die API nutzen zu können, müsst ihr euch einen API-Key generieren. Eine Schritt-für-Schritt-Anleitung und alle technischen Details findet ihr in der zugehörigen Swagger-Dokumentation: https://mensa.gregorflachs.de/swaggerdoku
+
+
+Hinweise zum Plagiat & zur Eigenständigkeit:
+Der im jeweiligen GitHub-Repository abgelegte Quellcode muss vollständig von der jeweiligen Gruppe selbstständig entwickelt worden sein.
+
+1. Zusammenarbeit zwischen Gruppen ist nicht erlaubt.
+2. Die Übernahme von Quellcode oder Code-Fragmenten anderer Gruppen – auch aus vergangenen Semestern – ist streng untersagt.
+
+Wichtig: Ein Plagiatsversuch – auch bei nur einem Teil des Projekts – führt zur Bewertung der gesamten Veranstaltung mit „nicht ausreichend“ (5,0) oder „ohne Erfolg“ (o.E.).
+
+
+
+
+
+
+

@@ -1,0 +1,59 @@
+Designkonzept:
+
+Ein überzeugendes App-Erlebnis beginnt mit einem durchdachten Design. Im Rahmen eures Projekts erstellt ihr ein vollständiges Design-Konzept, das euer Verständnis für das Nutzerproblem sowie eure methodische Herangehensweise sichtbar macht. Dabei nutzt ihr Erkenntnisse und Methoden, die wir im Laufe der Veranstaltung behandelt haben – insbesondere Scrum & Design-Thinking. Bzgl. der User Stories soll ausdrücklich auch eine generative KI wie ChatGPT in der Gruppe genutzt werden.
+
+Euer Konzept wird Teil der Bewertung und soll nachvollziehbar, visuell aufbereitet und klar strukturiert sein.
+
+Problemverständnis dokumentieren:
+
+Legt nachvollziehbar dar, welches zentrale Nutzerbedürfnis oder Problem ihr mit eurer App adressiert.
+
+Erwartete Inhalte:
+
+1. Beschreibung der Zielgruppe: Wer sind eure Nutzer*innen? Welche Bedürfnisse haben sie?
+2. Beschreibung des Problems: In welchen Situationen tritt es auf? Welche Aspekte sind kritisch?
+3. Begründung eurer Themenwahl: Warum habt ihr euch entschieden, genau dieses Problem zu lösen?
+4. Beteiligung realer Nutzer*innen: Welche Methoden habt ihr genutzt, um Nutzerfeedback einzuholen (z. B. Interviews, Umfragen, Beobachtungen)?
+
+Herangehensweise & Methodik beschreiben:
+
+Zeigt, wie ihr von der Problemstellung zur Lösungsidee gelangt seid. Design Thinking bietet hier einen Problem- und Lösungskontext an. Alternativ bietet sich eine Root-Cause-Analysis (RCA) an, um das Problemverständnis nochmal etwas zu schärfen, bevor an der Lösung gearbeitet wird.
+
+Erwartete Inhalte:
+
+1. Kurze Beschreibung eurer Vorgehensweise (z. B. User Story Writing, Customer Journey Mapping)
+2. Genutzte Tools (z. B. Miro, ..., Figma)
+3. Benchmarks oder bestehende Lösungen, die euch inspiriert haben
+4. Schwierigkeiten, auf die ihr gestoßen seid, und wie ihr damit umgegangen seid
+5. Besondere Erkenntnisse während des Gestaltungsprozesses
+
+
+Visualisierung mit Wireframes & Screen-Designs:
+
+Stellt eure Lösungsidee visuell dar. Zeigt klar, wie die App aus Nutzersicht funktioniert.
+
+Erwartete Inhalte:
+
+1. Erste Skizzen/Wireframes eures Features (auch analoge Zeichnungen sind zulässig)
+2. Iterationen: Wie habt ihr die Gestaltung im Team weiterentwickelt?
+3. Screen-Designs in einem Tool eurer Wahl (z. B. Figma)
+4. Customer Journey Map zur Veranschaulichung der Nutzerführung
+
+Hinweis zur Abgrenzung von Konzept & Umsetzung:
+
+Das Design-Konzept darf auch Funktionen oder Ideen enthalten, die nicht implementiert werden. Diese müssen jedoch klar als konzeptionell gekennzeichnet sein und vom umgesetzten Funktionsumfang abgegrenzt werden. So kann bei der Bewertung zwischen technischer Leistung und kreativer Lösungsidee unterschieden werden.
+
+
+Darstellung & Dokumentation:
+
+Das gesamte Designkonzept muss vollständig und nachvollziehbar in Miro dargestellt bzw. eingebunden werden – auch dann, wenn ihr externe Tools (z. B. Figma oder Notion) verwendet.
+Alle Inhalte (Skizzen, Screens, Erkenntnisse, User Journeys etc.) sollen dort sichtbar verknüpft und leicht nachvollziehbar dokumentiert sein.
+
+Backlog & Kanban Board:
+
+Nutzt bitte den eingebrachten Impuls des Backlog's und Kanban Boards. Die Kriterien, die wir als Dozenten und Product Owner hier eingebracht haben, diese sollten sich bei euch im Backlog in der Section/Swimlane "Must-Have" wiederfinden.
+
+
+Zum festgelegten Stichtag kann das Designkonzept vorgestellt werden.
+Ein Konzept, das zu diesem Termin vollständig und überzeugend präsentiert wird, erhält 3 Bonuspunkte.
+Es darf danach weiterhin überarbeitet und erweitert werden, um neue Erkenntnisse oder Anpassungen aus der Entwicklung einfließen zu lassen.
