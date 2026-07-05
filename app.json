@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Mensabär",
+    "slug": "mensabaer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2E3D23"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "de.htw.mensabaer"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2E3D23",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "de.htw.mensabaer",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
