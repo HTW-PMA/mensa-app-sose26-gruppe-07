@@ -1,0 +1,21 @@
+Was ist eine Push Notification und was nicht?
+Push Notifications
+• Kommen vom Server
+• App kann geschlossen sein
+• Benötigt Internet
+Local Notifications
+• Werden vom Gerät selbst ausgelöst
+• Zeit- oder Event-basiert
+• Kein Internet nötig
+In-App Message
+• Nur sichtbar, wenn App offen ist
+• kein OS-Notification-System
+Mensa App Anforderung Mensa App Alternative keine Mensa App Anforderung
+
+Vereinfachte Push Notifications für React Native
+• Ein Services von Expo, der APN & FCM abstrahiert
+• APN & FCM Keys werden weiterhin benötigt, allerdings in EAS konfiguriert (Credentials à Android & iOS credentials
+Setup: https://docs.expo.dev/push-notifications/push-notifications-setup/
+Push Notifications funktionieren nur auf echten Geräten - nicht im Emulator oder Simulator.
+Push Notifications funktionieren nicht mit Expo Go sondern nur mit einem Development oder Production Build.
+(Siehe Folien im Kapitel App Store)
