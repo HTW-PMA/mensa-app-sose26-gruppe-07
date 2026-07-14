@@ -11,6 +11,7 @@ interface MensaCardProps {
   onPress?: () => void;
   onToggleFavorite?: () => void;
   showChevron?: boolean;
+  isSelected?: boolean;
 }
 
 export function MensaCard({
@@ -19,12 +20,29 @@ export function MensaCard({
   onPress,
   onToggleFavorite,
   showChevron = true,
+  isSelected = false,
 }: MensaCardProps) {
   return (
-    <Pressable onPress={onPress} style={styles.card}>
-      <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
+    <Pressable
+      onPress={onPress}
+      style={[styles.card, isSelected && styles.cardSelected]}
+    >
+      {canteen.imageUrl ? (
+        <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
+      ) : (
+        <View style={[styles.image, styles.imagePlaceholder]}>
+          <Ionicons name="location-outline" size={24} color={COLORS.salbeigruen} />
+        </View>
+      )}
       <View style={styles.content}>
         <Text style={styles.name}>{canteen.name}</Text>
+        {isSelected ? (
+          <View style={styles.selectedBadge}>
+            <Ionicons name="checkmark-circle" size={13} color={COLORS.white} />
+            <Text style={styles.selectedText}>AUSGEWÄHLT</Text>
+          </View>
+        ) : null}
+        {canteen.address ? <Text style={styles.address}>{canteen.address}</Text> : null}
         <View style={styles.statusRow}>
           {canteen.distance ? (
             <Text style={styles.meta}>{canteen.distance}</Text>
@@ -53,7 +71,13 @@ export function MensaCard({
       ) : null}
 
       {onToggleFavorite ? (
-        <Pressable onPress={onToggleFavorite} style={styles.heartButton}>
+        <Pressable
+          onPress={(event) => {
+            event.stopPropagation();
+            onToggleFavorite();
+          }}
+          style={styles.heartButton}
+        >
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={22}
@@ -84,6 +108,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
     backgroundColor: COLORS.creme,
   },
+  cardSelected: {
+    borderColor: COLORS.waldgruen,
+    borderWidth: 2,
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: {
     flex: 1,
     paddingRight: 24,
@@ -92,6 +124,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.waldgruen,
+    marginBottom: 4,
+  },
+  selectedBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.waldgruen,
+    borderRadius: LAYOUT.borderRadius.full,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    gap: 3,
+    marginBottom: 4,
+  },
+  selectedText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: COLORS.white,
+    letterSpacing: 0.6,
+  },
+  address: {
+    fontSize: 11,
+    color: COLORS.textMuted,
     marginBottom: 4,
   },
   statusRow: {

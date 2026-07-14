@@ -18,9 +18,16 @@ export function MensaLocationCard({
 }: MensaLocationCardProps) {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
+      {canteen.imageUrl ? (
+        <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
+      ) : (
+        <View style={[styles.image, styles.imagePlaceholder]}>
+          <Ionicons name="location-outline" size={26} color={COLORS.salbeigruen} />
+        </View>
+      )}
       <View style={styles.content}>
         <Text style={styles.name}>{canteen.name}</Text>
+        {canteen.address ? <Text style={styles.address}>{canteen.address}</Text> : null}
         <View style={styles.statusRow}>
           {canteen.distance ? (
             <Text style={styles.meta}>{canteen.distance}</Text>
@@ -74,6 +81,10 @@ const styles = StyleSheet.create({
     marginRight: 14,
     backgroundColor: COLORS.creme,
   },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: {
     flex: 1,
   },
@@ -81,6 +92,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.waldgruen,
+    marginBottom: 4,
+  },
+  address: {
+    fontSize: 11,
+    color: COLORS.textMuted,
     marginBottom: 4,
   },
   statusRow: {

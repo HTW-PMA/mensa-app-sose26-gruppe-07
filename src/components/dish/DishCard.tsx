@@ -5,6 +5,7 @@ import { COLORS } from '../../constants/colors';
 import { LAYOUT } from '../../constants/layout';
 import { Meal } from '../../types/api';
 import { DishTag } from './DishTag';
+import { MealInfo } from './MealInfo';
 
 interface DishCardProps {
   meal: Meal;
@@ -25,69 +26,87 @@ export function DishCard({
 }: DishCardProps) {
   return (
     <View style={[styles.card, compact && styles.cardCompact]}>
-      <Image
-        source={{ uri: meal.imageUrl }}
-        style={[styles.image, compact && styles.imageCompact]}
-      />
-      <View style={styles.content}>
-        <View style={styles.headerRow}>
-          <Text style={styles.name} numberOfLines={1}>
-            {meal.name}
-          </Text>
-          <Text style={styles.price}>{formatPrice(meal.price)}</Text>
-        </View>
-
-        {meal.canteenName ? (
-          <Text style={styles.meta}>
-            {meal.canteenName}
-            {meal.menueName ? ` • ${meal.menueName}` : ''}
-          </Text>
-        ) : null}
-
-        {meal.description ? (
-          <Text style={styles.description} numberOfLines={2}>
-            {meal.description}
-          </Text>
-        ) : null}
-
-        {meal.badges && meal.badges.length > 0 ? (
-          <View style={styles.tags}>
-            {meal.badges.map((badge) => (
-              <DishTag key={badge} label={badge} />
-            ))}
+      <View style={styles.mainRow}>
+        {meal.imageUrl ? (
+          <Image
+            source={{ uri: meal.imageUrl }}
+            style={[styles.image, compact && styles.imageCompact]}
+          />
+        ) : (
+          <View
+            style={[
+              styles.image,
+              styles.imagePlaceholder,
+              compact && styles.imageCompact,
+            ]}
+          >
+            <Ionicons name="restaurant-outline" size={24} color={COLORS.salbeigruen} />
           </View>
-        ) : null}
+        )}
+        <View style={styles.content}>
+          <View style={styles.headerRow}>
+            <Text style={styles.name} numberOfLines={compact ? 2 : 1}>
+              {meal.name}
+            </Text>
+            <Text style={styles.price}>{formatPrice(meal.price)}</Text>
+          </View>
 
-        {meal.allergens && meal.allergens.length > 0 ? (
-          <Text style={styles.allergens}>
-            Allergene: {meal.allergens.join(', ')}
-          </Text>
-        ) : null}
+          {meal.canteenName ? (
+            <Text style={styles.meta}>
+              {meal.canteenName}
+              {meal.menueName ? ` • ${meal.menueName}` : ''}
+            </Text>
+          ) : null}
+
+          {meal.description ? (
+            <Text style={styles.description} numberOfLines={2}>
+              {meal.description}
+            </Text>
+          ) : null}
+
+          {meal.badges && meal.badges.length > 0 ? (
+            <View style={styles.tags}>
+              {meal.badges.map((badge) => (
+                <DishTag key={badge} label={badge} />
+              ))}
+            </View>
+          ) : null}
+        </View>
       </View>
 
-      {onToggleFavorite ? (
-        <Pressable onPress={onToggleFavorite} style={styles.heartButton}>
-          <Ionicons
-            name={isFavorite ? 'heart' : 'heart-outline'}
-            size={22}
-            color={COLORS.waldgruen}
-          />
-        </Pressable>
-      ) : null}
+      <View style={styles.footer}>
+        <View style={styles.mealInfoContainer}>
+          <MealInfo meal={meal} compact={compact} />
+        </View>
+        {onToggleFavorite ? (
+          <Pressable
+            onPress={onToggleFavorite}
+            style={styles.heartButton}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isFavorite ? 'Gericht aus Favoriten entfernen' : 'Gericht favorisieren'
+            }
+          >
+            <Ionicons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={22}
+              color={COLORS.waldgruen}
+            />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
     backgroundColor: COLORS.white,
     borderRadius: LAYOUT.borderRadius.md,
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
-    position: 'relative',
   },
   cardCompact: {
     padding: 10,
@@ -103,9 +122,15 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
   },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mainRow: {
+    flexDirection: 'row',
+  },
   content: {
     flex: 1,
-    paddingRight: 28,
   },
   headerRow: {
     flexDirection: 'row',
@@ -140,14 +165,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginBottom: 4,
   },
-  allergens: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  mealInfoContainer: {
+    flex: 1,
+    marginRight: 8,
   },
   heartButton: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.creme,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

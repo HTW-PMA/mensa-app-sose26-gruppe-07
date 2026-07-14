@@ -7,23 +7,23 @@ interface DishTagProps {
   label: string;
 }
 
-function getTagColor(label: string): string {
+function getTagStyle(label: string) {
   const lower = label.toLowerCase();
   if (lower.includes('vegan') || lower.includes('vegetarisch')) {
-    return COLORS.tagVegan;
+    return styles.tagVegan;
   }
   if (lower.includes('bio')) {
-    return COLORS.tagBio;
+    return styles.tagBio;
   }
-  if (lower.includes('co2')) {
-    return COLORS.tagCo2;
+  if (lower.includes('co2') || lower.includes('co₂')) {
+    return styles.tagCo2;
   }
-  return COLORS.creme;
+  return styles.tagDefault;
 }
 
 export function DishTag({ label }: DishTagProps) {
   return (
-    <View style={[styles.tag, { backgroundColor: getTagColor(label) }]}>
+    <View style={[styles.tag, getTagStyle(label)]}>
       <Text style={styles.label}>{label}</Text>
     </View>
   );
@@ -36,6 +36,18 @@ const styles = StyleSheet.create({
     borderRadius: LAYOUT.borderRadius.sm,
     marginRight: 6,
     marginBottom: 4,
+  },
+  tagVegan: {
+    backgroundColor: COLORS.tagVegan,
+  },
+  tagBio: {
+    backgroundColor: COLORS.tagBio,
+  },
+  tagCo2: {
+    backgroundColor: COLORS.tagCo2,
+  },
+  tagDefault: {
+    backgroundColor: COLORS.creme,
   },
   label: {
     fontSize: 10,
