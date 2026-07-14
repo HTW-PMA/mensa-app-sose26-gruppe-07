@@ -11,6 +11,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#2E3D23"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#2E3D23",
+          "defaultChannel": "meal-reminders"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "de.htw.mensabaer"

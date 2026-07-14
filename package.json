@@ -4,14 +4,16 @@
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.2",
     "@react-navigation/native": "^7.1.14",
-    "expo": "~56.0.12",
+    "expo": "~56.0.15",
+    "expo-notifications": "~56.0.20",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-safe-area-context": "^5.5.2",
+    "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "^4.11.1",
     "react-native-web": "^0.21.2"
   },
@@ -23,7 +25,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }
