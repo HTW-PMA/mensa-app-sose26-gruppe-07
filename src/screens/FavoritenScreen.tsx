@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 import { ScreenContainer } from '../components/layout/ScreenContainer';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { SegmentedControl } from '../components/common/SegmentedControl';
@@ -10,18 +11,19 @@ import { MensaCard } from '../components/mensa/MensaCard';
 import { COLORS } from '../constants/colors';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCanteens } from '../hooks/useCanteens';
-import { useMeals } from '../hooks/useMeals';
 import { useAppState } from '../context/AppContext';
+import { TabParamList } from '../navigation/TabNavigator';
+
+type FavoritesNav = BottomTabNavigationProp<TabParamList, 'Favoriten'>;
 
 export function FavoritenScreen() {
+  const navigation = useNavigation<FavoritesNav>();
   const [segmentIndex, setSegmentIndex] = useState(0);
-  const [isEditing, setIsEditing] = useState(false);
-  const { canteens } = useCanteens();
-  const { selectedCanteenId } = useAppState();
-  const { meals } = useMeals(selectedCanteenId);
+  const { canteens, error } = useCanteens();
+  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
   const {
     favoriteCanteenIds,
-    favoriteMealIds,
+    favoriteMeals,
     isCanteenFavorite,
     isMealFavorite,
     toggleCanteenFavorite,
@@ -29,13 +31,8 @@ export function FavoritenScreen() {
   } = useFavorites();
 
   const favoriteCanteens = useMemo(
-    () => canteens.filter((c) => favoriteCanteenIds.includes(c.id)),
+    () => canteens.filter((canteen) => favoriteCanteenIds.includes(canteen.id)),
     [canteens, favoriteCanteenIds],
-  );
-
-  const favoriteMeals = useMemo(
-    () => meals.filter((m) => favoriteMealIds.includes(m.id)),
-    [meals, favoriteMealIds],
   );
 
   return (
@@ -52,24 +49,17 @@ export function FavoritenScreen() {
       />
 
       <View style={styles.sectionHeader}>
-        <View>
-          <Text style={styles.sectionTitle}>
-            {segmentIndex === 0 ? 'Lieblingsmensen' : 'Lieblingsgerichte'}
-          </Text>
-          <Text style={styles.sectionSub}>
-            {segmentIndex === 0
-              ? 'Deine favorisierten Mensen'
-              : 'Deine favorisierten Gerichte'}
-          </Text>
-        </View>
-        <Pressable
-          style={styles.editButton}
-          onPress={() => setIsEditing(!isEditing)}
-        >
-          <Ionicons name="pencil" size={14} color={COLORS.waldgruen} />
-          <Text style={styles.editText}>Bearbeiten</Text>
-        </Pressable>
+        <Text style={styles.sectionTitle}>
+          {segmentIndex === 0 ? 'Lieblingsmensen' : 'Lieblingsgerichte'}
+        </Text>
+        <Text style={styles.sectionSub}>
+          {segmentIndex === 0
+            ? 'Deine favorisierten Mensen'
+            : 'Deine favorisierten Gerichte'}
+        </Text>
       </View>
+
+      {error && segmentIndex === 0 ? <Text style={styles.errorText}>{error}</Text> : null}
 
       {segmentIndex === 0 ? (
         favoriteCanteens.length > 0 ? (
@@ -77,7 +67,12 @@ export function FavoritenScreen() {
             <MensaCard
               key={canteen.id}
               canteen={canteen}
+              isSelected={canteen.id === selectedCanteenId}
               isFavorite={isCanteenFavorite(canteen.id)}
+              onPress={() => {
+                setSelectedCanteenId(canteen.id);
+                navigation.navigate('Speiseplan');
+              }}
               onToggleFavorite={() => toggleCanteenFavorite(canteen.id)}
             />
           ))
@@ -92,7 +87,7 @@ export function FavoritenScreen() {
             key={meal.id}
             meal={meal}
             isFavorite={isMealFavorite(meal.id)}
-            onToggleFavorite={() => toggleMealFavorite(meal.id)}
+            onToggleFavorite={() => toggleMealFavorite(meal)}
           />
         ))
       ) : (
@@ -101,66 +96,25 @@ export function FavoritenScreen() {
         </Text>
       )}
 
-      {segmentIndex === 0 && favoriteMeals.length > 0 ? (
-        <>
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>Lieblingsgerichte</Text>
-              <Text style={styles.sectionSub}>Deine favorisierten Gerichte</Text>
-            </View>
-            <Pressable style={styles.editButton}>
-              <Ionicons name="pencil" size={14} color={COLORS.waldgruen} />
-              <Text style={styles.editText}>Bearbeiten</Text>
-            </Pressable>
-          </View>
-          {favoriteMeals.map((meal) => (
-            <DishCard
-              key={meal.id}
-              meal={meal}
-              isFavorite={isMealFavorite(meal.id)}
-              onToggleFavorite={() => toggleMealFavorite(meal.id)}
-            />
-          ))}
-        </>
-      ) : null}
-
       <SustainabilityBanner />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.waldgruen,
-  },
-  sectionSub: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  editText: {
-    fontSize: 13,
-    color: COLORS.waldgruen,
-    fontWeight: '600',
-  },
+  sectionHeader: { marginBottom: 12 },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: COLORS.waldgruen },
+  sectionSub: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   emptyText: {
     fontSize: 14,
     color: COLORS.textMuted,
     textAlign: 'center',
     marginVertical: 24,
     lineHeight: 22,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 13,
+    marginBottom: 12,
   },
 });

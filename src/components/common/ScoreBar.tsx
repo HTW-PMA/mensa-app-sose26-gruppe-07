@@ -8,19 +8,30 @@ interface ScoreBarProps {
   segments?: number;
 }
 
-export function ScoreBar({ score, maxScore, segments = 4 }: ScoreBarProps) {
-  const filledSegments = Math.round((score / Math.max(maxScore, 1)) * segments);
+export function ScoreBar({ score, maxScore, segments }: ScoreBarProps) {
+  if (maxScore <= 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.scoreText}>–</Text>
+      </View>
+    );
+  }
+
+  const segmentCount = Math.max(segments ?? maxScore, 1);
+  const filledSegments = Math.round(
+    (Math.max(0, Math.min(score, maxScore)) / Math.max(maxScore, 1)) * segmentCount,
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.bar}>
-        {Array.from({ length: segments }).map((_, index) => (
+        {Array.from({ length: segmentCount }).map((_, index) => (
           <View
             key={index}
             style={[
               styles.segment,
               index < filledSegments ? styles.segmentFilled : styles.segmentEmpty,
-              index < segments - 1 && styles.segmentGap,
+              index < segmentCount - 1 && styles.segmentGap,
             ]}
           />
         ))}

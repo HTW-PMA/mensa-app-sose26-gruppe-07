@@ -22,23 +22,31 @@ import { TabParamList } from '../navigation/TabNavigator';
 
 type HomeNav = BottomTabNavigationProp<TabParamList, 'Home'>;
 
-const QUICK_ACCESS = [
-  { label: 'Speiseplan', sub: 'heute ansehen', icon: 'calendar-outline' as const, tab: 'Speiseplan' as const },
-  { label: 'Favoriten', sub: 'ansehen', icon: 'star-outline' as const, tab: 'Favoriten' as const },
-  { label: 'Gerichtefinder', sub: 'passende Gerichte finden', icon: 'paw-outline' as const, tab: 'Gerichtefinder' as const },
-  { label: 'Benachrichtigungen', sub: 'verwalten', icon: 'notifications-outline' as const, tab: 'Profil' as const },
-];
-
 export function HomeScreen() {
   const navigation = useNavigation<HomeNav>();
   const [searchQuery, setSearchQuery] = useState('');
-  const { canteens, loading } = useCanteens();
-  const { setSelectedCanteenId, apiError } = useAppState();
+  const [showAllCanteens, setShowAllCanteens] = useState(false);
+  const { canteens, loading, error, reload } = useCanteens();
+  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
   const { isCanteenFavorite, toggleCanteenFavorite } = useFavorites();
 
-  const filteredCanteens = canteens.filter((canteen) =>
-    canteen.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const normalizedSearch = searchQuery.trim().toLocaleLowerCase('de-DE');
+  const filteredCanteens = canteens.filter((canteen) => {
+    const searchableText = `${canteen.name} ${canteen.address ?? ''}`.toLocaleLowerCase(
+      'de-DE',
+    );
+    return searchableText.includes(normalizedSearch);
+  });
+  const prioritizedCanteens = selectedCanteenId
+    ? [
+        ...filteredCanteens.filter((canteen) => canteen.id === selectedCanteenId),
+        ...filteredCanteens.filter((canteen) => canteen.id !== selectedCanteenId),
+      ]
+    : filteredCanteens;
+  const visibleCanteens =
+    normalizedSearch || showAllCanteens
+      ? filteredCanteens
+      : prioritizedCanteens.slice(0, 5);
 
   return (
     <ScreenContainer>
@@ -69,12 +77,11 @@ export function HomeScreen() {
         <Ionicons name="search" size={18} color={COLORS.textMuted} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Mensa oder Gericht suchen..."
+          placeholder="Mensa oder Adresse suchen..."
           placeholderTextColor={COLORS.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <Ionicons name="options-outline" size={18} color={COLORS.textMuted} />
       </View>
 
       <View style={styles.heroCard}>
@@ -100,44 +107,48 @@ export function HomeScreen() {
         </View>
       </View>
 
-      {apiError ? <Text style={styles.errorText}>{apiError}</Text> : null}
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable style={styles.retryButton} onPress={() => reload(true)}>
+            <Text style={styles.retryText}>Erneut laden</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Berliner Mensen</Text>
-        <Text style={styles.sectionLink}>Alle anzeigen ›</Text>
+        {!loading && canteens.length > 5 && !normalizedSearch ? (
+          <Pressable onPress={() => setShowAllCanteens((current) => !current)}>
+            <Text style={styles.sectionLink}>
+              {showAllCanteens ? 'Weniger anzeigen' : `Alle ${canteens.length} anzeigen`}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {loading ? (
         <ActivityIndicator color={COLORS.waldgruen} style={styles.loader} />
       ) : (
-        filteredCanteens.map((canteen) => (
-          <MensaCard
-            key={canteen.id}
-            canteen={canteen}
-            isFavorite={isCanteenFavorite(canteen.id)}
-            onPress={() => {
-              setSelectedCanteenId(canteen.id);
-              navigation.navigate('Speiseplan');
-            }}
-            onToggleFavorite={() => toggleCanteenFavorite(canteen.id)}
-          />
-        ))
+        <>
+          {visibleCanteens.map((canteen) => (
+            <MensaCard
+              key={canteen.id}
+              canteen={canteen}
+              isSelected={canteen.id === selectedCanteenId}
+              isFavorite={isCanteenFavorite(canteen.id)}
+              onPress={() => {
+                setSelectedCanteenId(canteen.id);
+                navigation.navigate('Speiseplan');
+              }}
+              onToggleFavorite={() => toggleCanteenFavorite(canteen.id)}
+            />
+          ))}
+          {visibleCanteens.length === 0 && !error ? (
+            <Text style={styles.emptyText}>Keine passende Mensa gefunden.</Text>
+          ) : null}
+        </>
       )}
-
-      <Text style={styles.sectionTitle}>Schnellzugriff</Text>
-      <View style={styles.quickGrid}>
-        {QUICK_ACCESS.map((item) => (
-          <Pressable
-            key={item.label}
-            style={styles.quickCard}
-            onPress={() => navigation.navigate(item.tab)}
-          >
-            <Ionicons name={item.icon} size={24} color={COLORS.waldgruen} />
-            <Text style={styles.quickLabel}>{item.label}</Text>
-            <Text style={styles.quickSub}>{item.sub}</Text>
-          </Pressable>
-        ))}
-      </View>
 
       <SustainabilityBanner />
     </ScreenContainer>
@@ -273,36 +284,33 @@ const styles = StyleSheet.create({
     color: COLORS.salbeigruen,
     fontWeight: '600',
   },
-  quickGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 8,
-  },
-  quickCard: {
-    width: '47%',
-    backgroundColor: COLORS.creme,
-    borderRadius: LAYOUT.borderRadius.md,
-    padding: 16,
-    alignItems: 'flex-start',
-  },
-  quickLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.waldgruen,
-    marginTop: 8,
-  },
-  quickSub: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
   loader: {
     marginVertical: 20,
   },
   errorText: {
     color: COLORS.error,
     fontSize: 13,
+  },
+  errorContainer: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.error,
+    borderWidth: 1,
+    borderRadius: LAYOUT.borderRadius.sm,
+    padding: 12,
     marginBottom: 12,
+  },
+  retryButton: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  retryText: {
+    color: COLORS.waldgruen,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  emptyText: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginVertical: 20,
   },
 });

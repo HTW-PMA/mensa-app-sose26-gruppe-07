@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   StyleSheet,
@@ -9,52 +10,124 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/layout/ScreenContainer';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
+import { DateSelector } from '../components/common/DateSelector';
 import { FilterChip } from '../components/common/FilterChip';
 import { ScoreBar } from '../components/common/ScoreBar';
+import { MealInfo } from '../components/dish/MealInfo';
+import { CanteenSelector } from '../components/mensa/CanteenSelector';
 import { COLORS } from '../constants/colors';
 import { LAYOUT } from '../constants/layout';
 import { useAppState } from '../context/AppContext';
 import { usePreferences } from '../context/PreferencesContext';
+import { useCanteens } from '../hooks/useCanteens';
 import { useMeals } from '../hooks/useMeals';
 import { KI_FILTER_OPTIONS } from '../services/mockData';
-import { scoreMeals } from '../services/recommendationService';
+import { ScoredMeal, scoreMeals } from '../services/recommendationService';
+import { getUpcomingDates } from '../utils/dates';
 
 export function GerichtefinderScreen() {
-  const { selectedCanteenId } = useAppState();
-  const { meals } = useMeals(selectedCanteenId);
-  const { selectedFilters, toggleFilter, resetFilters } = usePreferences();
-  const [appliedFilters, setAppliedFilters] = useState<string[]>(selectedFilters);
-
-  const scoredMeals = useMemo(
-    () => scoreMeals(meals, appliedFilters),
-    [meals, appliedFilters],
+  const planningDates = useMemo(() => getUpcomingDates(), []);
+  const [selectedDateIso, setSelectedDateIso] = useState(planningDates[0].iso);
+  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
+  const {
+    canteens,
+    loading: canteensLoading,
+    error: canteensError,
+    reload: reloadCanteens,
+  } = useCanteens();
+  const selectedCanteen =
+    canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0];
+  const selectedDate =
+    planningDates.find((date) => date.iso === selectedDateIso) ?? planningDates[0];
+  const {
+    meals,
+    loading: mealsLoading,
+    error: mealsError,
+    reload: reloadMeals,
+  } = useMeals(
+    selectedCanteen?.id ?? null,
+    selectedDate.iso,
   );
+  const { selectedFilters, hasHydrated, toggleFilter, resetFilters } = usePreferences();
+  const [scoredMeals, setScoredMeals] = useState<ScoredMeal[]>([]);
+  const [recommendationLoading, setRecommendationLoading] = useState(false);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const maxScore = Math.max(appliedFilters.length, 4);
   const topScore = scoredMeals[0]?.score ?? 0;
+
+  useEffect(() => {
+    if (selectedCanteen && selectedCanteen.id !== selectedCanteenId) {
+      setSelectedCanteenId(selectedCanteen.id);
+    }
+  }, [selectedCanteen, selectedCanteenId, setSelectedCanteenId]);
+
+  useEffect(() => {
+    if (!hasHydrated || mealsLoading || mealsError || meals.length === 0) {
+      setScoredMeals([]);
+      setRecommendationError(null);
+      setRecommendationLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setRecommendationLoading(true);
+    setRecommendationError(null);
+
+    scoreMeals(meals, selectedFilters, controller.signal)
+      .then(setScoredMeals)
+      .catch((loadError: unknown) => {
+        if (controller.signal.aborted) return;
+        setScoredMeals([]);
+        setRecommendationError(
+          loadError instanceof Error
+            ? loadError.message
+            : 'Empfehlungen konnten nicht berechnet werden.',
+        );
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setRecommendationLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [hasHydrated, meals, mealsError, mealsLoading, retryCount, selectedFilters]);
+
+  const loading = canteensLoading || mealsLoading || recommendationLoading;
+  const error = canteensError ?? mealsError ?? recommendationError;
+
+  const retry = () => {
+    if (canteensError) reloadCanteens(true);
+    if (mealsError) reloadMeals(true);
+    if (recommendationError) setRetryCount((count) => count + 1);
+  };
 
   return (
     <ScreenContainer>
       <ScreenHeader title="Gerichtefinder" showBack={false} />
 
-      <View style={styles.heroCard}>
-        <Text style={styles.heroEmoji}>🐻‍🍳</Text>
-        <View style={styles.heroContent}>
-          <Text style={styles.heroTitle}>
-            Ich helfe dir,{' '}
-            <Text style={styles.heroHighlight}>das Richtige zu finden!</Text>
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            Lass dir passende Gerichte empfehlen: basierend auf deinen
-            Vorlieben und Allergien.
-          </Text>
-        </View>
+      <View style={styles.planningSection}>
+        <Text style={styles.planningTitle}>Plane dein Mensaessen</Text>
+        <Text style={styles.planningSubtitle}>
+          Mensa und Tag bestimmen, welche Gerichte bewertet werden.
+        </Text>
+        <CanteenSelector
+          canteens={canteens}
+          selectedCanteen={selectedCanteen}
+          loading={canteensLoading}
+          onSelect={(canteen) => setSelectedCanteenId(canteen.id)}
+        />
+        <Text style={styles.controlLabel}>TAG AUSWÄHLEN</Text>
+        <DateSelector
+          dates={planningDates}
+          selectedIso={selectedDate.iso}
+          onSelect={(date) => setSelectedDateIso(date.iso)}
+        />
       </View>
 
       <Text style={styles.sectionTitle}>KI Auswahl</Text>
       <Text style={styles.sectionSub}>
-        Worauf hast du heute Lust? Klicke alles an, was zu deinem Gericht passt.
-        Die KI berechnet das bestmögliche Match.
+        Worauf hast du Lust? Klicke alles an, was zu deinem Gericht passt.
+        Die Empfehlungen aktualisieren sich automatisch.
       </Text>
 
       <View style={styles.filterGrid}>
@@ -72,22 +145,40 @@ export function GerichtefinderScreen() {
       <View style={styles.prologDivider}>
         <View style={styles.dividerLine} />
         <Ionicons name="sparkles" size={12} color={COLORS.textMuted} />
-        <Text style={styles.prologText}>PROLOG BERECHNET SCORE</Text>
+        <Text style={styles.prologText}>SWI-PROLOG BERECHNET SCORE</Text>
         <Ionicons name="sparkles" size={12} color={COLORS.textMuted} />
         <View style={styles.dividerLine} />
       </View>
 
       <View style={styles.resultsHeader}>
-        <Text style={styles.resultsTitle}>EMPFEHLUNGEN HEUTE</Text>
+        <View>
+          <Text style={styles.resultsTitle}>EMPFEHLUNGEN</Text>
+          <Text style={styles.resultsDate}>{selectedDate.fullLabel}</Text>
+        </View>
         <Text style={styles.resultsScoreLabel}>SCORE</Text>
       </View>
 
-      {scoredMeals.map((item) => {
+      {loading ? (
+        <ActivityIndicator color={COLORS.waldgruen} style={styles.loader} />
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable onPress={retry}>
+            <Text style={styles.retryText}>Erneut laden</Text>
+          </Pressable>
+        </View>
+      ) : scoredMeals.length === 0 ? (
+        <Text style={styles.emptyText}>
+          {meals.length === 0
+            ? `Für ${selectedDate.fullLabel} sind keine Gerichte verfügbar.`
+            : 'Kein Gericht erfüllt die gewählten Ernährungsbedingungen.'}
+        </Text>
+      ) : scoredMeals.map((item) => {
         const isRecommended = item.score === topScore && item.score > 0;
         const criteriaText =
           item.score === 0
             ? 'Keine Kriterien treffen zu'
-            : `${item.score} von ${maxScore} Kriterien erfüllt`;
+            : `${item.score} von ${item.maxScore} ausgewählten Kriterien erfüllt`;
 
         return (
           <View
@@ -98,52 +189,53 @@ export function GerichtefinderScreen() {
             ]}
           >
             {isRecommended ? <View style={styles.accentBar} /> : null}
-            <Image
-              source={{ uri: item.meal.imageUrl }}
-              style={styles.resultImage}
-            />
-            <View style={styles.resultContent}>
-              <View style={styles.resultTitleRow}>
-                <Text
-                  style={[
-                    styles.resultName,
-                    isRecommended && styles.resultNameActive,
-                  ]}
-                >
-                  {item.meal.name}
-                </Text>
+            <View style={styles.resultMainRow}>
+              {item.meal.imageUrl ? (
+                <Image source={{ uri: item.meal.imageUrl }} style={styles.resultImage} />
+              ) : (
+                <View style={[styles.resultImage, styles.resultImagePlaceholder]}>
+                  <Ionicons
+                    name="restaurant-outline"
+                    size={22}
+                    color={COLORS.salbeigruen}
+                  />
+                </View>
+              )}
+              <View style={styles.resultContent}>
+                <View style={styles.resultTitleRow}>
+                  <Text
+                    style={[
+                      styles.resultName,
+                      isRecommended && styles.resultNameActive,
+                    ]}
+                  >
+                    {item.meal.name}
+                  </Text>
+                  {isRecommended ? (
+                    <View style={styles.recommendedBadge}>
+                      <Text style={styles.recommendedText}>EMPFOHLEN</Text>
+                    </View>
+                  ) : null}
+                </View>
+                <Text style={styles.resultCriteria}>{criteriaText}</Text>
                 {isRecommended ? (
-                  <View style={styles.recommendedBadge}>
-                    <Text style={styles.recommendedText}>EMPFOHLEN</Text>
-                  </View>
+                  <Text style={styles.resultNote}>
+                    {item.meal.name} passt besonders gut zu deiner Auswahl.
+                  </Text>
                 ) : null}
               </View>
-              <Text style={styles.resultCriteria}>{criteriaText}</Text>
-              {isRecommended ? (
-                <Text style={styles.resultNote}>
-                  {item.meal.name} passt heute besser zu deiner Auswahl.
-                </Text>
-              ) : null}
+              <ScoreBar score={item.score} maxScore={item.maxScore} />
             </View>
-            <ScoreBar score={item.score} maxScore={maxScore} />
+            <View style={styles.resultDetails}>
+              <MealInfo meal={item.meal} compact />
+            </View>
           </View>
         );
       })}
 
       <Pressable
-        style={styles.primaryButton}
-        onPress={() => setAppliedFilters([...selectedFilters])}
-      >
-        <Ionicons name="filter" size={18} color={COLORS.white} />
-        <Text style={styles.primaryButtonText}>Filter anwenden</Text>
-      </Pressable>
-
-      <Pressable
         style={styles.secondaryButton}
-        onPress={() => {
-          resetFilters();
-          setAppliedFilters([]);
-        }}
+        onPress={resetFilters}
       >
         <Ionicons name="refresh" size={18} color={COLORS.waldgruen} />
         <Text style={styles.secondaryButtonText}>Filter zurücksetzen</Text>
@@ -153,34 +245,30 @@ export function GerichtefinderScreen() {
 }
 
 const styles = StyleSheet.create({
-  heroCard: {
-    flexDirection: 'row',
+  planningSection: {
     backgroundColor: COLORS.creme,
     borderRadius: LAYOUT.borderRadius.lg,
-    padding: 16,
-    marginBottom: 20,
-    gap: 12,
-    alignItems: 'center',
+    padding: 14,
+    marginBottom: 16,
   },
-  heroEmoji: {
-    fontSize: 56,
-  },
-  heroContent: {
-    flex: 1,
-  },
-  heroTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  planningTitle: {
+    fontSize: 17,
+    fontWeight: '800',
     color: COLORS.waldgruen,
-    marginBottom: 6,
   },
-  heroHighlight: {
-    color: COLORS.salbeigruen,
-  },
-  heroSubtitle: {
+  planningSubtitle: {
     fontSize: 12,
     color: COLORS.textMuted,
-    lineHeight: 18,
+    lineHeight: 17,
+    marginTop: 3,
+    marginBottom: 12,
+  },
+  controlLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    letterSpacing: 1.1,
+    marginBottom: 6,
   },
   sectionTitle: {
     fontSize: 17,
@@ -227,6 +315,12 @@ const styles = StyleSheet.create({
     color: COLORS.waldgruen,
     letterSpacing: 0.5,
   },
+  resultsDate: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 2,
+    textTransform: 'capitalize',
+  },
   resultsScoreLabel: {
     fontSize: 12,
     fontWeight: '700',
@@ -234,8 +328,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   resultCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: LAYOUT.borderRadius.md,
     padding: 12,
@@ -247,6 +339,10 @@ const styles = StyleSheet.create({
   },
   resultCardRecommended: {
     borderColor: COLORS.waldgruen,
+  },
+  resultMainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   accentBar: {
     position: 'absolute',
@@ -263,6 +359,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginLeft: 4,
     backgroundColor: COLORS.creme,
+  },
+  resultImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   resultContent: {
     flex: 1,
@@ -306,20 +406,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic',
   },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.waldgruen,
-    borderRadius: LAYOUT.borderRadius.md,
-    paddingVertical: 14,
-    marginTop: 16,
-    gap: 8,
-  },
-  primaryButtonText: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: '700',
+  resultDetails: {
+    marginTop: 8,
+    marginLeft: 4,
   },
   secondaryButton: {
     flexDirection: 'row',
@@ -328,7 +417,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.creme,
     borderRadius: LAYOUT.borderRadius.md,
     paddingVertical: 14,
-    marginTop: 10,
+    marginTop: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     gap: 8,
@@ -337,5 +426,26 @@ const styles = StyleSheet.create({
     color: COLORS.waldgruen,
     fontSize: 15,
     fontWeight: '600',
+  },
+  loader: {
+    marginVertical: 24,
+  },
+  errorText: {
+    color: COLORS.error,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    marginVertical: 20,
+    alignItems: 'center',
+    gap: 8,
+  },
+  retryText: {
+    color: COLORS.waldgruen,
+    fontWeight: '700',
+  },
+  emptyText: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginVertical: 20,
   },
 });

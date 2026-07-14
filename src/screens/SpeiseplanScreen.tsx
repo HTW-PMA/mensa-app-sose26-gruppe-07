@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -7,14 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/layout/ScreenContainer';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
+import { DateSelector } from '../components/common/DateSelector';
 import { FilterChip } from '../components/common/FilterChip';
 import { SustainabilityBanner } from '../components/common/SustainabilityBanner';
 import { DishCard } from '../components/dish/DishCard';
 import { SideDishRow } from '../components/dish/SideDishRow';
-import { MensaLocationCard } from '../components/mensa/MensaLocationCard';
+import { CanteenSelector } from '../components/mensa/CanteenSelector';
 import { COLORS } from '../constants/colors';
 import { LAYOUT } from '../constants/layout';
 import { useAppState } from '../context/AppContext';
@@ -23,102 +23,104 @@ import { useCanteens } from '../hooks/useCanteens';
 import { useMeals } from '../hooks/useMeals';
 import { CATEGORY_FILTERS } from '../services/mockData';
 import { Meal } from '../types/api';
-
-function getWeekDates(): { day: string; date: string; iso: string }[] {
-  const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-  const result = [];
-  const today = new Date();
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    result.push({
-      day: days[d.getDay()],
-      date: `${d.getDate()}. ${d.toLocaleString('de-DE', { month: 'short' })}`,
-      iso: d.toISOString().split('T')[0],
-    });
-  }
-  return result;
-}
+import { getUpcomingDates } from '../utils/dates';
 
 function filterMealsByCategory(meals: Meal[], category: string): Meal[] {
   if (category === 'Alle') return meals;
   if (category === 'Vegane Gerichte') {
-    return meals.filter((m) => m.badges?.some((b) => b.toLowerCase() === 'vegan'));
+    return meals.filter((meal) =>
+      meal.badges?.some((badge) => badge.toLowerCase() === 'vegan'),
+    );
   }
   if (category === 'Vegetarische Gerichte') {
-    return meals.filter((m) =>
-      m.badges?.some((b) => ['vegan', 'vegetarisch'].includes(b.toLowerCase())),
+    return meals.filter((meal) =>
+      meal.badges?.some((badge) =>
+        ['vegan', 'vegetarisch'].includes(badge.toLowerCase()),
+      ),
     );
   }
   if (category === 'Fleischgerichte') {
     return meals.filter(
-      (m) => !m.badges?.some((b) => ['vegan', 'vegetarisch'].includes(b.toLowerCase())),
+      (meal) =>
+        !meal.badges?.some((badge) =>
+          ['vegan', 'vegetarisch'].includes(badge.toLowerCase()),
+        ),
     );
   }
   return meals;
 }
 
 export function SpeiseplanScreen() {
-  const weekDates = useMemo(() => getWeekDates(), []);
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const weekDates = useMemo(() => getUpcomingDates(), []);
+  const [selectedDateIso, setSelectedDateIso] = useState(weekDates[0].iso);
   const [selectedCategory, setSelectedCategory] = useState('Alle');
-  const { selectedCanteenId } = useAppState();
-  const { canteens } = useCanteens();
-  const { menueSections, loading } = useMeals(
-    selectedCanteenId,
-    weekDates[selectedDateIndex]?.iso,
-  );
-  const { apiError } = useAppState();
-  const { isCanteenFavorite, isMealFavorite, toggleCanteenFavorite, toggleMealFavorite } =
-    useFavorites();
-
+  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
+  const {
+    canteens,
+    loading: canteensLoading,
+    error: canteensError,
+    reload: reloadCanteens,
+  } = useCanteens();
   const selectedCanteen =
-    canteens.find((c) => c.id === selectedCanteenId) ?? canteens[0];
+    canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0];
+  const selectedDate =
+    weekDates.find((date) => date.iso === selectedDateIso) ?? weekDates[0];
+  const {
+    menueSections,
+    loading: mealsLoading,
+    error: mealsError,
+    reload: reloadMeals,
+  } = useMeals(selectedCanteen?.id ?? null, selectedDate.iso);
+  const {
+    isCanteenFavorite,
+    isMealFavorite,
+    toggleCanteenFavorite,
+    toggleMealFavorite,
+  } = useFavorites();
+
+  useEffect(() => {
+    if (selectedCanteen && selectedCanteen.id !== selectedCanteenId) {
+      setSelectedCanteenId(selectedCanteen.id);
+    }
+  }, [selectedCanteen, selectedCanteenId, setSelectedCanteenId]);
+
+  const visibleSections = menueSections
+    .map((section) => ({
+      ...section,
+      meals: filterMealsByCategory(section.meals, selectedCategory),
+    }))
+    .filter((section) => section.meals.length > 0);
+  const error = canteensError ?? mealsError;
+  const loading = canteensLoading || (Boolean(selectedCanteen) && mealsLoading);
 
   return (
     <ScreenContainer>
       <ScreenHeader title="Speiseplan" showBack={false} />
 
-      {selectedCanteen ? (
-        <MensaLocationCard
-          canteen={selectedCanteen}
-          isFavorite={isCanteenFavorite(selectedCanteen.id)}
-          onToggleFavorite={() => toggleCanteenFavorite(selectedCanteen.id)}
+      <View style={styles.planningSection}>
+        <Text style={styles.planningTitle}>Dein Mensaplan</Text>
+        <Text style={styles.planningSubtitle}>
+          Wähle Mensa und Tag – der Speiseplan wird direkt aktualisiert.
+        </Text>
+        <CanteenSelector
+          canteens={canteens}
+          selectedCanteen={selectedCanteen}
+          loading={canteensLoading}
+          onSelect={(canteen) => setSelectedCanteenId(canteen.id)}
+          isFavorite={selectedCanteen ? isCanteenFavorite(selectedCanteen.id) : false}
+          onToggleFavorite={
+            selectedCanteen
+              ? () => toggleCanteenFavorite(selectedCanteen.id)
+              : undefined
+          }
         />
-      ) : null}
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.dateScroll}
-        contentContainerStyle={styles.dateScrollContent}
-      >
-        {weekDates.map((item, index) => (
-          <Pressable
-            key={item.iso}
-            onPress={() => setSelectedDateIndex(index)}
-            style={[styles.dateCard, index === selectedDateIndex && styles.dateCardActive]}
-          >
-            <Text
-              style={[
-                styles.dateDay,
-                index === selectedDateIndex && styles.dateTextActive,
-              ]}
-            >
-              {item.day}
-            </Text>
-            <Text
-              style={[
-                styles.dateLabel,
-                index === selectedDateIndex && styles.dateTextActive,
-              ]}
-            >
-              {item.date}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+        <Text style={styles.controlLabel}>TAG AUSWÄHLEN</Text>
+        <DateSelector
+          dates={weekDates}
+          selectedIso={selectedDate.iso}
+          onSelect={(date) => setSelectedDateIso(date.iso)}
+        />
+      </View>
 
       <ScrollView
         horizontal
@@ -138,49 +140,42 @@ export function SpeiseplanScreen() {
         ))}
       </ScrollView>
 
-      {apiError ? <Text style={styles.errorText}>{apiError}</Text> : null}
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable
+            onPress={() => {
+              if (canteensError) reloadCanteens(true);
+              if (mealsError) reloadMeals(true);
+            }}
+          >
+            <Text style={styles.retryText}>Erneut laden</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {loading ? (
         <ActivityIndicator color={COLORS.waldgruen} style={styles.loader} />
+      ) : visibleSections.length === 0 && !error ? (
+        <Text style={styles.emptyText}>
+          Für diesen Tag und Filter sind keine Gerichte verfügbar.
+        </Text>
       ) : (
-        menueSections.map((section) => {
-          const filteredMeals = filterMealsByCategory(section.meals, selectedCategory);
-          if (filteredMeals.length === 0) return null;
-
-          return (
-            <View key={section.id}>
-              <Text style={styles.menueTitle}>{section.name}</Text>
-
-              {section.name === 'Menü 2' ? (
-                <Pressable style={styles.recommendationCard}>
-                  <Ionicons name="sparkles" size={18} color={COLORS.salbeigruen} />
-                  <View style={styles.recommendationText}>
-                    <Text style={styles.recommendationTitle}>
-                      Empfohlen von deinem Mensabär Helfer
-                    </Text>
-                    <Text style={styles.recommendationSub}>
-                      Basierend auf deinen Vorlieben: vegetarisch, wenig Fleisch
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-                </Pressable>
-              ) : null}
-
-              {section.name === 'Beilagen'
-                ? filteredMeals.map((meal) => (
-                    <SideDishRow key={meal.id} meal={meal} />
-                  ))
-                : filteredMeals.map((meal) => (
-                    <DishCard
-                      key={meal.id}
-                      meal={meal}
-                      isFavorite={isMealFavorite(meal.id)}
-                      onToggleFavorite={() => toggleMealFavorite(meal.id)}
-                    />
-                  ))}
-            </View>
-          );
-        })
+        visibleSections.map((section) => (
+          <View key={section.id}>
+            <Text style={styles.menueTitle}>{section.name}</Text>
+            {section.name.toLowerCase().includes('beilage')
+              ? section.meals.map((meal) => <SideDishRow key={meal.id} meal={meal} />)
+              : section.meals.map((meal) => (
+                  <DishCard
+                    key={meal.id}
+                    meal={meal}
+                    isFavorite={isMealFavorite(meal.id)}
+                    onToggleFavorite={() => toggleMealFavorite(meal)}
+                  />
+                ))}
+          </View>
+        ))
       )}
 
       <SustainabilityBanner />
@@ -189,45 +184,33 @@ export function SpeiseplanScreen() {
 }
 
 const styles = StyleSheet.create({
-  dateScroll: {
-    marginBottom: 12,
+  planningSection: {
+    backgroundColor: COLORS.creme,
+    borderRadius: LAYOUT.borderRadius.lg,
+    padding: 14,
+    marginBottom: 14,
   },
-  dateScrollContent: {
-    gap: 8,
-  },
-  dateCard: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: LAYOUT.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    minWidth: 72,
-  },
-  dateCardActive: {
-    backgroundColor: COLORS.waldgruen,
-    borderColor: COLORS.waldgruen,
-  },
-  dateDay: {
-    fontSize: 13,
-    fontWeight: '600',
+  planningTitle: {
+    fontSize: 17,
+    fontWeight: '800',
     color: COLORS.waldgruen,
   },
-  dateLabel: {
-    fontSize: 11,
+  planningSubtitle: {
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginTop: 2,
+    lineHeight: 17,
+    marginTop: 3,
+    marginBottom: 12,
   },
-  dateTextActive: {
-    color: COLORS.white,
+  controlLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    letterSpacing: 1.1,
+    marginBottom: 6,
   },
-  filterScroll: {
-    marginBottom: 16,
-  },
-  filterScrollContent: {
-    paddingRight: 8,
-  },
+  filterScroll: { marginBottom: 16 },
+  filterScrollContent: { paddingRight: 8 },
   menueTitle: {
     fontSize: 16,
     fontWeight: '700',
@@ -235,36 +218,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginTop: 8,
   },
-  recommendationCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.creme,
-    borderRadius: LAYOUT.borderRadius.md,
-    padding: 14,
-    marginBottom: 12,
-    gap: 10,
+  loader: { marginVertical: 24 },
+  errorContainer: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.error,
     borderWidth: 1,
-    borderColor: COLORS.salbeigruen,
-  },
-  recommendationText: {
-    flex: 1,
-  },
-  recommendationTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.waldgruen,
-  },
-  recommendationSub: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  loader: {
-    marginVertical: 24,
-  },
-  errorText: {
-    color: COLORS.error,
-    fontSize: 13,
+    borderRadius: LAYOUT.borderRadius.sm,
+    padding: 12,
     marginBottom: 12,
+    gap: 8,
+  },
+  errorText: { color: COLORS.error, fontSize: 13 },
+  retryText: { color: COLORS.waldgruen, fontSize: 13, fontWeight: '700' },
+  emptyText: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginVertical: 24,
   },
 });

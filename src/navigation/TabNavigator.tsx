@@ -51,10 +51,15 @@ export function TabNavigator() {
             </View>
           );
         },
-        tabBarLabel: ({ focused, color }) => {
+        tabBarLabel: ({ focused }) => {
           const config = TAB_CONFIG.find((tab) => tab.name === route.name);
           return (
-            <Text style={[styles.tabLabel, { color }, focused && styles.tabLabelActive]}>
+            <Text
+              style={[
+                styles.tabLabel,
+                focused ? styles.tabLabelActive : styles.tabLabelInactive,
+              ]}
+            >
               {config?.label}
             </Text>
           );
@@ -92,5 +97,9 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     fontWeight: '700',
+    color: COLORS.waldgruen,
+  },
+  tabLabelInactive: {
+    color: COLORS.textMuted,
   },
 });
