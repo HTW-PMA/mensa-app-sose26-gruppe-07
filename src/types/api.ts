@@ -6,18 +6,26 @@ export interface Canteen {
   isOpen?: boolean;
   openingHours?: string;
   imageUrl?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Badge {
   id: string;
   name: string;
+  description?: string;
   color?: string;
 }
 
 export interface Additive {
   id: string;
   name: string;
-  type?: string;
+  referenceId?: string;
+}
+
+export interface MealPrice {
+  type: string;
+  value: number;
 }
 
 export interface Meal {
@@ -25,6 +33,8 @@ export interface Meal {
   name: string;
   description?: string;
   price: number;
+  prices?: MealPrice[];
+  category?: string;
   canteenId?: string;
   canteenName?: string;
   menueName?: string;
@@ -33,6 +43,8 @@ export interface Meal {
   imageUrl?: string;
   tags?: string[];
   criteria?: string[];
+  waterBalance?: number;
+  co2Balance?: number;
 }
 
 export interface MenueSection {
@@ -41,26 +53,74 @@ export interface MenueSection {
   meals: Meal[];
 }
 
+export interface ApiGeoLocation {
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface ApiBusinessHour {
+  openAt?: string;
+  closeAt?: string;
+  businessHourType?: string;
+}
+
+export interface ApiBusinessDay {
+  day?: string;
+  businessHours?: ApiBusinessHour[];
+  businesshours?: ApiBusinessHour[];
+}
+
 export interface ApiCanteen {
-  id: string;
+  id?: string;
+  ID?: string;
   name: string;
-  address?: { street?: string; city?: string };
-  openingHours?: Array<{ day?: string; open?: string; close?: string }>;
+  address?: {
+    street?: string;
+    city?: string;
+    zipcode?: string;
+    district?: string;
+    geoLocation?: ApiGeoLocation;
+    geolocation?: ApiGeoLocation;
+  };
+  businessDays?: ApiBusinessDay[];
+  url?: string;
+  lastUpdated?: string;
+}
+
+export interface ApiBadge {
+  id?: string;
+  ID?: string;
+  name: string;
+  description?: string;
+}
+
+export interface ApiAdditive {
+  id?: string;
+  ID?: string;
+  text: string;
+  referenceid?: string;
+}
+
+export interface ApiMealPrice {
+  price: number;
+  priceType: string;
 }
 
 export interface ApiMeal {
-  id: string;
+  id?: string;
+  ID?: string;
   name: string;
-  description?: string;
-  price?: number;
-  canteenId?: string;
-  badges?: string[];
-  additives?: string[];
+  prices?: ApiMealPrice[];
+  category?: string;
+  additives?: ApiAdditive[];
+  badges?: ApiBadge[];
+  waterBilanz?: number;
+  co2Bilanz?: number;
 }
 
 export interface ApiMenue {
-  id: string;
-  name: string;
-  meals?: string[];
+  date: string;
   canteenId?: string;
+  canteeenId?: string;
+  meals?: ApiMeal[];
 }

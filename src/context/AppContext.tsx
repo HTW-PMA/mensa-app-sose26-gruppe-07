@@ -1,39 +1,55 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   ReactNode,
 } from 'react';
 
 interface AppContextValue {
   selectedCanteenId: string | null;
-  setSelectedCanteenId: (id: string) => void;
-  apiError: string | null;
-  setApiError: (error: string | null) => void;
+  setSelectedCanteenId: (id: string | null) => void;
 }
 
+const STORAGE_KEY = '@mensabaer/app-state/v1';
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [selectedCanteenId, setSelectedCanteenIdState] = useState<string | null>(
-    'canteen-1',
+    null,
   );
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const hasLocalChanges = useRef(false);
 
-  const setSelectedCanteenId = useCallback((id: string) => {
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((value) => {
+        if (value && !hasLocalChanges.current) setSelectedCanteenIdState(value);
+      })
+      .finally(() => setHasHydrated(true));
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (selectedCanteenId) {
+      AsyncStorage.setItem(STORAGE_KEY, selectedCanteenId).catch(() => undefined);
+    } else {
+      AsyncStorage.removeItem(STORAGE_KEY).catch(() => undefined);
+    }
+  }, [hasHydrated, selectedCanteenId]);
+
+  const setSelectedCanteenId = useCallback((id: string | null) => {
+    hasLocalChanges.current = true;
     setSelectedCanteenIdState(id);
   }, []);
 
   const value = useMemo(
-    () => ({
-      selectedCanteenId,
-      setSelectedCanteenId,
-      apiError,
-      setApiError,
-    }),
-    [selectedCanteenId, setSelectedCanteenId, apiError],
+    () => ({ selectedCanteenId, setSelectedCanteenId }),
+    [selectedCanteenId, setSelectedCanteenId],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

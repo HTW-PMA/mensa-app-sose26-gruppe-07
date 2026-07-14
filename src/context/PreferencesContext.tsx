@@ -1,51 +1,99 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   ReactNode,
 } from 'react';
 
+interface PersistedPreferences {
+  selectedFilters: string[];
+  dietPreferences: string[];
+}
+
 interface PreferencesContextValue {
   selectedFilters: string[];
   dietPreferences: string[];
+  hasHydrated: boolean;
   toggleFilter: (label: string) => void;
   resetFilters: () => void;
   setDietPreferences: (prefs: string[]) => void;
 }
 
+const STORAGE_KEY = '@mensabaer/preferences/v1';
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(
   undefined,
 );
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(['Leicht']);
-  const [dietPreferences, setDietPreferences] = useState<string[]>([
-    'vegetarisch',
-  ]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [dietPreferences, setDietPreferencesState] = useState<string[]>([]);
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const hasFilterChanges = useRef(false);
+  const hasDietChanges = useRef(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((serialized) => {
+        if (!serialized) return;
+        const stored = JSON.parse(serialized) as Partial<PersistedPreferences>;
+        if (!hasFilterChanges.current && Array.isArray(stored.selectedFilters)) {
+          setSelectedFilters(stored.selectedFilters);
+        }
+        if (!hasDietChanges.current && Array.isArray(stored.dietPreferences)) {
+          setDietPreferencesState(stored.dietPreferences);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setHasHydrated(true));
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    const value: PersistedPreferences = { selectedFilters, dietPreferences };
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(value)).catch(() => undefined);
+  }, [dietPreferences, hasHydrated, selectedFilters]);
 
   const toggleFilter = useCallback((label: string) => {
-    setSelectedFilters((prev) =>
-      prev.includes(label)
-        ? prev.filter((item) => item !== label)
-        : [...prev, label],
+    hasFilterChanges.current = true;
+    setSelectedFilters((current) =>
+      current.includes(label)
+        ? current.filter((item) => item !== label)
+        : [...current, label],
     );
   }, []);
 
   const resetFilters = useCallback(() => {
+    hasFilterChanges.current = true;
     setSelectedFilters([]);
+  }, []);
+
+  const setDietPreferences = useCallback((preferences: string[]) => {
+    hasDietChanges.current = true;
+    setDietPreferencesState(preferences);
   }, []);
 
   const value = useMemo(
     () => ({
       selectedFilters,
       dietPreferences,
+      hasHydrated,
       toggleFilter,
       resetFilters,
       setDietPreferences,
     }),
-    [selectedFilters, dietPreferences, toggleFilter, resetFilters],
+    [
+      selectedFilters,
+      dietPreferences,
+      hasHydrated,
+      toggleFilter,
+      resetFilters,
+      setDietPreferences,
+    ],
   );
 
   return (

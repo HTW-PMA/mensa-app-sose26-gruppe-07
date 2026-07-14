@@ -1,33 +1,39 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCanteens } from '../services/mensaApi';
-import { useAppState } from '../context/AppContext';
 import { Canteen } from '../types/api';
 
 export function useCanteens() {
   const [canteens, setCanteens] = useState<Canteen[]>([]);
   const [loading, setLoading] = useState(true);
-  const { setApiError } = useAppState();
+  const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  const loadCanteens = useCallback(async () => {
+  const loadCanteens = useCallback(async (forceRefresh = false) => {
+    const activeRequest = ++requestId.current;
     setLoading(true);
     try {
-      const data = await getCanteens();
+      const data = await getCanteens(forceRefresh);
+      if (activeRequest !== requestId.current) return;
       setCanteens(data);
-      setApiError(null);
-    } catch (error) {
-      setApiError(
-        error instanceof Error
-          ? error.message
+      setError(null);
+    } catch (loadError) {
+      if (activeRequest !== requestId.current) return;
+      setError(
+        loadError instanceof Error
+          ? loadError.message
           : 'Mensen konnten nicht geladen werden.',
       );
     } finally {
-      setLoading(false);
+      if (activeRequest === requestId.current) setLoading(false);
     }
-  }, [setApiError]);
+  }, []);
 
   useEffect(() => {
     loadCanteens();
+    return () => {
+      requestId.current += 1;
+    };
   }, [loadCanteens]);
 
-  return { canteens, loading, reload: loadCanteens };
+  return { canteens, loading, error, reload: loadCanteens };
 }

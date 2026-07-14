@@ -11,12 +11,14 @@ export class ApiError extends Error {
 }
 
 function getApiKey(): string | undefined {
-  return process.env.EXPO_PUBLIC_MENSA_API_KEY;
+  return process.env.EXPO_PUBLIC_MENSA_API_KEY?.trim();
 }
 
 export function hasApiKey(): boolean {
   const key = getApiKey();
-  return Boolean(key && key !== 'dein-api-key-hier');
+  return Boolean(
+    key && !['api-key-hier', 'dein-api-key-hier'].includes(key.toLowerCase()),
+  );
 }
 
 function getErrorMessage(status: number, body?: string): string {
@@ -40,8 +42,10 @@ export async function apiGet<T>(
 ): Promise<T> {
   const apiKey = getApiKey();
 
-  if (!apiKey || apiKey === 'dein-api-key-hier') {
-    throw new ApiError('Kein API-Key konfiguriert');
+  if (!hasApiKey() || !apiKey) {
+    throw new ApiError(
+      'Kein Mensa-API-Key konfiguriert. Bitte EXPO_PUBLIC_MENSA_API_KEY in .env setzen.',
+    );
   }
 
   const url = new URL(`${BASE_URL}${endpoint}`);
@@ -53,17 +57,25 @@ export async function apiGet<T>(
     });
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   let response: Response;
   try {
     response = await fetch(url.toString(), {
       method: 'GET',
+      signal: controller.signal,
       headers: {
         'X-API-KEY': apiKey,
         Accept: 'application/json',
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ApiError('Die Mensa-API antwortet nicht. Bitte erneut versuchen.');
+    }
     throw new ApiError('Netzwerkfehler. Bitte Internetverbindung prüfen.');
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {
