@@ -39,4 +39,18 @@ describe('apiGet', () => {
       }),
     );
   });
+
+  it('shows the backend error message instead of raw JSON', async () => {
+    process.env.EXPO_PUBLIC_APP_API_URL = 'https://mensabaer.example';
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({ error: 'Mensa service configuration is missing' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+
+    await expect(apiGet('/canteen')).rejects.toMatchObject({
+      message: 'Mensa service configuration is missing',
+    });
+  });
 });

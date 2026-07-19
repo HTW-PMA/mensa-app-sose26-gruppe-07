@@ -23,6 +23,17 @@ const DEFAULT_SETTINGS: MealReminderSettings = {
   minute: 30,
 };
 
+function isValidTime(hour: number, minute: number): boolean {
+  return (
+    Number.isInteger(hour) &&
+    hour >= 0 &&
+    hour <= 23 &&
+    Number.isInteger(minute) &&
+    minute >= 0 &&
+    minute <= 59
+  );
+}
+
 export class NotificationError extends Error {
   constructor(message: string) {
     super(message);
@@ -67,9 +78,8 @@ async function readPersistedReminder(): Promise<PersistedReminder> {
     if (
       typeof value.enabled !== 'boolean' ||
       typeof hour !== 'number' ||
-      !Number.isInteger(hour) ||
       typeof minute !== 'number' ||
-      !Number.isInteger(minute)
+      !isValidTime(hour, minute)
     ) {
       return DEFAULT_SETTINGS;
     }
@@ -113,14 +123,7 @@ async function ensurePermission(Notifications: NotificationsModule): Promise<voi
 }
 
 function validateTime(hour: number, minute: number): void {
-  if (
-    !Number.isInteger(hour) ||
-    hour < 0 ||
-    hour > 23 ||
-    !Number.isInteger(minute) ||
-    minute < 0 ||
-    minute > 59
-  ) {
+  if (!isValidTime(hour, minute)) {
     throw new NotificationError('Die Erinnerungszeit ist ungültig.');
   }
 }

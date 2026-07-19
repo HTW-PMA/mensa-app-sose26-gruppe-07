@@ -11,6 +11,21 @@ export class ApiError extends Error {
 }
 
 function getErrorMessage(status: number, body?: string): string {
+  if (body) {
+    try {
+      const payload: unknown = JSON.parse(body);
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        typeof (payload as { error?: unknown }).error === 'string'
+      ) {
+        return (payload as { error: string }).error;
+      }
+    } catch {
+      // Non-JSON responses use the status-specific fallback below.
+    }
+  }
+
   switch (status) {
     case 401:
       return 'Der App-Dienst ist nicht für die Mensa-API konfiguriert.';
@@ -21,7 +36,7 @@ function getErrorMessage(status: number, body?: string): string {
     case 429:
       return 'Zu viele Anfragen. Bitte später erneut versuchen.';
     default:
-      return body || 'Ein unbekannter Fehler ist aufgetreten.';
+      return 'Der App-Dienst ist vorübergehend nicht verfügbar.';
   }
 }
 

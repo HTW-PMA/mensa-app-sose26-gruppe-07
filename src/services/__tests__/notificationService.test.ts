@@ -83,6 +83,18 @@ describe('meal reminder notifications', () => {
     });
   });
 
+  it('falls back to default settings when persisted time is out of range', async () => {
+    mockGetItem.mockResolvedValue(
+      JSON.stringify({ enabled: true, hour: 24, minute: -1 }),
+    );
+
+    await expect(getMealReminderSettings()).resolves.toEqual({
+      enabled: false,
+      hour: 11,
+      minute: 30,
+    });
+  });
+
   it('schedules a daily reminder after notification permission is granted', async () => {
     await saveMealReminder({ enabled: true, hour: 12, minute: 15 });
 

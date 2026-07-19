@@ -86,7 +86,7 @@ export function HomeScreen() {
             zu finden!
           </Text>
           <Text style={styles.heroSubtitle}>
-            Passende Gerichte basierend auf deinen Vorlieben und Allergien.
+            Passende Gerichte basierend auf deiner aktuellen Auswahl.
           </Text>
           <Pressable
             style={styles.heroButton}
