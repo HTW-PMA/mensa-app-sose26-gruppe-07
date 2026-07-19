@@ -7,7 +7,6 @@ interface ScreenHeaderProps {
   title?: string;
   showBack?: boolean;
   onBack?: () => void;
-  showNotification?: boolean;
   centerTitle?: boolean;
 }
 
@@ -15,7 +14,6 @@ export function ScreenHeader({
   title,
   showBack = false,
   onBack,
-  showNotification = true,
   centerTitle = true,
 }: ScreenHeaderProps) {
   return (
@@ -37,18 +35,7 @@ export function ScreenHeader({
         <View style={styles.titlePlaceholder} />
       )}
 
-      <View style={styles.side}>
-        {showNotification ? (
-          <View style={styles.bellContainer}>
-            <Ionicons
-              name="notifications-outline"
-              size={22}
-              color={COLORS.waldgruen}
-            />
-            <View style={styles.notificationDot} />
-          </View>
-        ) : null}
-      </View>
+      <View style={styles.side} />
     </View>
   );
 }
@@ -84,18 +71,5 @@ const styles = StyleSheet.create({
   },
   titlePlaceholder: {
     flex: 1,
-  },
-  bellContainer: {
-    alignSelf: 'flex-end',
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.salbeigruen,
   },
 });

@@ -63,14 +63,6 @@ export function HomeScreen() {
             </View>
           </View>
         </View>
-        <View style={styles.bellContainer}>
-          <Ionicons
-            name="notifications-outline"
-            size={22}
-            color={COLORS.waldgruen}
-          />
-          <View style={styles.notificationDot} />
-        </View>
       </View>
 
       <View style={styles.searchContainer}>
@@ -188,18 +180,6 @@ const styles = StyleSheet.create({
   location: {
     fontSize: 13,
     color: COLORS.textMuted,
-  },
-  bellContainer: {
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.salbeigruen,
   },
   searchContainer: {
     flexDirection: 'row',

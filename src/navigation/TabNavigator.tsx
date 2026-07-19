@@ -29,7 +29,12 @@ const TAB_CONFIG: {
   { name: 'Speiseplan', label: 'Speiseplan', icon: 'restaurant-outline', iconActive: 'restaurant' },
   { name: 'Favoriten', label: 'Favoriten', icon: 'star-outline', iconActive: 'star' },
   { name: 'Gerichtefinder', label: 'Gerichtefinder', icon: 'paw-outline', iconActive: 'paw' },
-  { name: 'Profil', label: 'Profil', icon: 'person-outline', iconActive: 'person' },
+  {
+    name: 'Profil',
+    label: 'Einstellungen',
+    icon: 'settings-outline',
+    iconActive: 'settings',
+  },
 ];
 
 export function TabNavigator() {
@@ -55,6 +60,7 @@ export function TabNavigator() {
           const config = TAB_CONFIG.find((tab) => tab.name === route.name);
           return (
             <Text
+              numberOfLines={1}
               style={[
                 styles.tabLabel,
                 focused ? styles.tabLabelActive : styles.tabLabelInactive,
@@ -80,8 +86,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopColor: COLORS.border,
     borderTopWidth: 1,
-    height: 64,
-    paddingBottom: 8,
     paddingTop: 4,
   },
   tabIconContainer: {
@@ -92,7 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.creme,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9,
     marginTop: 2,
   },
   tabLabelActive: {
