@@ -15,6 +15,7 @@ import { LAYOUT } from '../constants/layout';
 import {
   getMealReminderSettings,
   MealReminderSettings,
+  scheduleTestNotification,
   saveMealReminder,
 } from '../services/notificationService';
 
@@ -49,6 +50,25 @@ export function ProfilScreen() {
         error instanceof Error
           ? error.message
           : 'Essens-Erinnerung konnte nicht gespeichert werden.',
+      );
+    } finally {
+      setReminderLoading(false);
+    }
+  };
+
+  const testNotification = async () => {
+    setReminderLoading(true);
+    setReminderMessage(null);
+    try {
+      await scheduleTestNotification();
+      setReminderMessage(
+        'Testbenachrichtigung geplant. Sie erscheint in etwa fünf Sekunden.',
+      );
+    } catch (error) {
+      setReminderMessage(
+        error instanceof Error
+          ? error.message
+          : 'Testbenachrichtigung konnte nicht geplant werden.',
       );
     } finally {
       setReminderLoading(false);
@@ -105,6 +125,20 @@ export function ProfilScreen() {
             );
           })}
         </View>
+        <Pressable
+          disabled={reminderLoading}
+          onPress={testNotification}
+          style={({ pressed }) => [
+            styles.testButton,
+            pressed && styles.testButtonPressed,
+            reminderLoading && styles.testButtonDisabled,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Testbenachrichtigung in fünf Sekunden senden"
+        >
+          <Ionicons name="paper-plane-outline" size={17} color={COLORS.waldgruen} />
+          <Text style={styles.testButtonText}>Test in 5 Sekunden</Text>
+        </Pressable>
         {reminderMessage ? <Text style={styles.reminderMessage}>{reminderMessage}</Text> : null}
       </View>
 
@@ -205,6 +239,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     marginTop: 10,
+  },
+  testButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderWidth: 1,
+    borderColor: COLORS.waldgruen,
+    borderRadius: LAYOUT.borderRadius.sm,
+    paddingVertical: 10,
+    marginTop: 12,
+  },
+  testButtonPressed: {
+    backgroundColor: COLORS.creme,
+  },
+  testButtonDisabled: {
+    opacity: 0.5,
+  },
+  testButtonText: {
+    color: COLORS.waldgruen,
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
 

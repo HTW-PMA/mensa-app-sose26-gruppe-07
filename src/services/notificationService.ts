@@ -122,6 +122,36 @@ async function ensurePermission(Notifications: NotificationsModule): Promise<voi
   }
 }
 
+async function ensureAndroidChannel(Notifications: NotificationsModule): Promise<void> {
+  if (Platform.OS !== 'android') return;
+
+  await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
+    name: 'Essens-Erinnerungen',
+    description: 'Tägliche Erinnerung an den aktuellen Mensa-Speiseplan',
+    importance: Notifications.AndroidImportance.DEFAULT,
+  });
+}
+
+export async function scheduleTestNotification(): Promise<void> {
+  const Notifications = await getNotifications();
+  await ensureAndroidChannel(Notifications);
+  await ensurePermission(Notifications);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Mensabär-Test erfolgreich 🐻',
+      body: 'Lokale Benachrichtigungen funktionieren auf diesem Gerät.',
+      sound: 'default',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 5,
+      repeats: false,
+      channelId: Platform.OS === 'android' ? CHANNEL_ID : undefined,
+    },
+  });
+}
+
 function validateTime(hour: number, minute: number): void {
   if (!isValidTime(hour, minute)) {
     throw new NotificationError('Die Erinnerungszeit ist ungültig.');
@@ -150,14 +180,7 @@ export async function saveMealReminder(
   }
 
   const Notifications = await getNotifications();
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Essens-Erinnerungen',
-      description: 'Tägliche Erinnerung an den aktuellen Mensa-Speiseplan',
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-  }
+  await ensureAndroidChannel(Notifications);
   await ensurePermission(Notifications);
 
   const notificationId = await Notifications.scheduleNotificationAsync({

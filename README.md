@@ -52,7 +52,10 @@ cd ../prolog-webserver-sose26-gruppe-07
 docker compose up -d --build
 ```
 
-Mit `http://localhost:4000/health` lässt sich prüfen, ob der Dienst läuft.
+Mit `http://localhost:4000/health` lässt sich prüfen, ob der Dienst läuft und
+`mensaApiConfigured` auf `true` steht. Vor einer Präsentation prüft
+`npm run presentation:check` zusätzlich einen echten Mensa-Abruf. Der Befehl
+gibt den API-Key niemals aus.
 
 Für Web und iOS-Simulator ist `http://localhost:4000` der Standard. Der
 Android-Emulator verwendet automatisch `http://10.0.2.2:4000`. Auf einem echten
@@ -61,16 +64,24 @@ Entwicklungsrechners oder auf einen gehosteten HTTPS-Dienst zeigen.
 
 ## App starten
 
-Zuerst im Android-Studio-Device-Manager einen Emulator starten. Danach im
-App-Repository:
+Für Notifications wird ein eigener Development Build verwendet. Expo Go ist
+für diesen Präsentationspfad nicht zuverlässig genug. Zuerst im
+Android-Studio-Device-Manager einen Emulator starten und einmalig bauen:
 
 ```bash
-npx expo start -c
+npm run android
 ```
 
-Mit `a` wird die App im laufenden Android-Emulator über Expo Go geöffnet; mit `w`
-startet die Web-Version. Lokale Essens-Erinnerungen können auf Android und iOS
-auch in Expo Go geprüft werden.
+Danach reicht, solange sich keine native Abhängigkeit ändert:
+
+```bash
+npm run presentation
+```
+
+Der Präsentationsbefehl startet und prüft zuerst das Backend und öffnet danach
+Metro für den installierten Development Build. Unter `Mehr` löst
+`Test in 5 Sekunden` eine echte lokale Notification aus, ohne die tägliche
+Erinnerung zu verändern.
 
 Beim ersten Aktivieren fragt die App nach der Systemberechtigung. Remote Push
 Notifications sind nicht Teil dieses Stands; dafür wären zusätzlich EAS-Projekt-ID

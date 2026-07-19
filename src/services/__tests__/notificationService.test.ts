@@ -32,7 +32,7 @@ jest.mock('expo-notifications', () => ({
   cancelScheduledNotificationAsync: mockCancelScheduledNotificationAsync,
   IosAuthorizationStatus: { PROVISIONAL: 3 },
   AndroidImportance: { DEFAULT: 3 },
-  SchedulableTriggerInputTypes: { DAILY: 'daily' },
+  SchedulableTriggerInputTypes: { DAILY: 'daily', TIME_INTERVAL: 'timeInterval' },
 }));
 
 import { Platform } from 'react-native';
@@ -40,6 +40,7 @@ import {
   configureNotificationHandling,
   getMealReminderSettings,
   NotificationError,
+  scheduleTestNotification,
   saveMealReminder,
 } from '../notificationService';
 
@@ -136,6 +137,24 @@ describe('meal reminder notifications', () => {
         trigger: expect.objectContaining({ channelId: 'meal-reminders' }),
       }),
     );
+  });
+
+  it('schedules a one-off presentation notification after five seconds', async () => {
+    await scheduleTestNotification();
+
+    expect(mockScheduleNotificationAsync).toHaveBeenCalledWith({
+      content: {
+        title: 'Mensabär-Test erfolgreich 🐻',
+        body: 'Lokale Benachrichtigungen funktionieren auf diesem Gerät.',
+        sound: 'default',
+      },
+      trigger: {
+        type: 'timeInterval',
+        seconds: 5,
+        repeats: false,
+        channelId: undefined,
+      },
+    });
   });
 
   it('accepts provisional iOS notification permission without requesting again', async () => {
