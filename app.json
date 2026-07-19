@@ -20,18 +20,18 @@
         {
           "image": "./assets/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#2E3D23",
+          "backgroundColor": "#F5F0E3",
           "imageWidth": 200
         }
       ]
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "de.htw.mensabaer"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#2E3D23",
+        "backgroundColor": "#F5F0E3",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
