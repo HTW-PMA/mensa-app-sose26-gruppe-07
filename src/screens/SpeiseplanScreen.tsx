@@ -54,15 +54,16 @@ export function SpeiseplanScreen() {
   const weekDates = useMemo(() => getUpcomingDates(), []);
   const [selectedDateIso, setSelectedDateIso] = useState(weekDates[0].iso);
   const [selectedCategory, setSelectedCategory] = useState('Alle');
-  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
+  const { selectedCanteenId, hasHydrated, setSelectedCanteenId } = useAppState();
   const {
     canteens,
     loading: canteensLoading,
     error: canteensError,
     reload: reloadCanteens,
   } = useCanteens();
-  const selectedCanteen =
-    canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0];
+  const selectedCanteen = hasHydrated
+    ? canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0]
+    : undefined;
   const selectedDate =
     weekDates.find((date) => date.iso === selectedDateIso) ?? weekDates[0];
   const {
@@ -70,7 +71,7 @@ export function SpeiseplanScreen() {
     loading: mealsLoading,
     error: mealsError,
     reload: reloadMeals,
-  } = useMeals(selectedCanteen?.id ?? null, selectedDate.iso);
+  } = useMeals(hasHydrated ? selectedCanteen?.id ?? null : null, selectedDate.iso);
   const {
     isCanteenFavorite,
     isMealFavorite,
@@ -79,10 +80,14 @@ export function SpeiseplanScreen() {
   } = useFavorites();
 
   useEffect(() => {
-    if (selectedCanteen && selectedCanteen.id !== selectedCanteenId) {
+    if (
+      hasHydrated &&
+      selectedCanteen &&
+      selectedCanteen.id !== selectedCanteenId
+    ) {
       setSelectedCanteenId(selectedCanteen.id);
     }
-  }, [selectedCanteen, selectedCanteenId, setSelectedCanteenId]);
+  }, [hasHydrated, selectedCanteen, selectedCanteenId, setSelectedCanteenId]);
 
   const visibleSections = menueSections
     .map((section) => ({
@@ -91,7 +96,10 @@ export function SpeiseplanScreen() {
     }))
     .filter((section) => section.meals.length > 0);
   const error = canteensError ?? mealsError;
-  const loading = canteensLoading || (Boolean(selectedCanteen) && mealsLoading);
+  const loading =
+    !hasHydrated ||
+    canteensLoading ||
+    (Boolean(selectedCanteen) && mealsLoading);
 
   return (
     <ScreenContainer>
