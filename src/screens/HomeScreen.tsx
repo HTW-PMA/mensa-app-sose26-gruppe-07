@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -52,9 +53,11 @@ export function HomeScreen() {
     <ScreenContainer>
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="paw" size={22} color={COLORS.white} />
-          </View>
+          <Image
+            source={require('../../assets/mensabaer-mark.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <View>
             <Text style={styles.appName}>Mensabär</Text>
             <View style={styles.locationRow}>
@@ -78,7 +81,11 @@ export function HomeScreen() {
 
       <View style={styles.heroCard}>
         <View style={styles.heroIcon}>
-          <Text style={styles.heroEmoji}>🐻‍🍳</Text>
+          <Image
+            source={require('../../assets/mensabaer-mark.png')}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.heroContent}>
           <Text style={styles.heroTitle}>
@@ -159,13 +166,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  logoCircle: {
+  logoImage: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.waldgruen,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   appName: {
     fontSize: 20,
@@ -211,8 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroEmoji: {
-    fontSize: 48,
+  heroImage: {
+    width: 72,
+    height: 72,
   },
   heroContent: {
     flex: 1,
