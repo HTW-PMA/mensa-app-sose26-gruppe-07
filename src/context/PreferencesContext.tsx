@@ -29,6 +29,10 @@ const PreferencesContext = createContext<PreferencesContextValue | undefined>(
   undefined,
 );
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [dietPreferences, setDietPreferencesState] = useState<string[]>([]);
@@ -42,10 +46,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         if (!serialized) return;
         const stored = JSON.parse(serialized) as Partial<PersistedPreferences>;
         if (!hasFilterChanges.current && Array.isArray(stored.selectedFilters)) {
-          setSelectedFilters(stored.selectedFilters);
+          setSelectedFilters(stored.selectedFilters.filter(isString));
         }
         if (!hasDietChanges.current && Array.isArray(stored.dietPreferences)) {
-          setDietPreferencesState(stored.dietPreferences);
+          setDietPreferencesState(stored.dietPreferences.filter(isString));
         }
       })
       .catch(() => undefined)

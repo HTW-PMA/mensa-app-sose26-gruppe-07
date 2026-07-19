@@ -31,6 +31,46 @@ const FavoritesContext = createContext<FavoritesContextValue | undefined>(
   undefined,
 );
 
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isString);
+}
+
+function isPersistedMeal(value: unknown): value is Meal {
+  if (!value || typeof value !== 'object') return false;
+
+  const meal = value as Record<string, unknown>;
+  return (
+    isString(meal.id) &&
+    isString(meal.name) &&
+    typeof meal.price === 'number' &&
+    Number.isFinite(meal.price) &&
+    (meal.description === undefined || isString(meal.description)) &&
+    (meal.category === undefined || isString(meal.category)) &&
+    (meal.canteenId === undefined || isString(meal.canteenId)) &&
+    (meal.canteenName === undefined || isString(meal.canteenName)) &&
+    (meal.menueName === undefined || isString(meal.menueName)) &&
+    (meal.imageUrl === undefined || isString(meal.imageUrl)) &&
+    (meal.badges === undefined || isStringArray(meal.badges)) &&
+    (meal.allergens === undefined || isStringArray(meal.allergens)) &&
+    (meal.tags === undefined || isStringArray(meal.tags)) &&
+    (meal.waterBalance === undefined || typeof meal.waterBalance === 'number') &&
+    (meal.co2Balance === undefined || typeof meal.co2Balance === 'number') &&
+    (meal.prices === undefined ||
+      (Array.isArray(meal.prices) &&
+        meal.prices.every(
+          (price) =>
+            !!price &&
+            typeof price === 'object' &&
+            isString((price as Record<string, unknown>).type) &&
+            typeof (price as Record<string, unknown>).value === 'number',
+        )))
+  );
+}
+
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favoriteCanteenIds, setFavoriteCanteenIds] = useState<string[]>([]);
   const [favoriteMeals, setFavoriteMeals] = useState<Meal[]>([]);
@@ -44,10 +84,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         if (!serialized) return;
         const stored = JSON.parse(serialized) as Partial<PersistedFavorites>;
         if (!hasCanteenChanges.current && Array.isArray(stored.favoriteCanteenIds)) {
-          setFavoriteCanteenIds(stored.favoriteCanteenIds);
+          setFavoriteCanteenIds(stored.favoriteCanteenIds.filter(isString));
         }
         if (!hasMealChanges.current && Array.isArray(stored.favoriteMeals)) {
-          setFavoriteMeals(stored.favoriteMeals);
+          setFavoriteMeals(stored.favoriteMeals.filter(isPersistedMeal));
         }
       })
       .catch(() => undefined)
