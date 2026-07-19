@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isRunningInExpoGo } from 'expo';
 import { Platform } from 'react-native';
 
 type NotificationsModule = typeof import('expo-notifications');
@@ -32,20 +31,21 @@ export class NotificationError extends Error {
 }
 
 export function configureNotificationHandling(): void {
-  if (Platform.OS === 'web' || isRunningInExpoGo()) return;
+  if (Platform.OS === 'web') return;
 
-  void import('expo-notifications')
-    .then((Notifications) => {
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowBanner: true,
-          shouldShowList: true,
-          shouldPlaySound: true,
-          shouldSetBadge: false,
-        }),
-      });
-    })
-    .catch(() => undefined);
+  try {
+    const Notifications = require('expo-notifications') as NotificationsModule;
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  } catch {
+    // Keep the rest of the app usable if notifications are unavailable.
+  }
 }
 
 async function getNotifications(): Promise<NotificationsModule> {
@@ -54,12 +54,7 @@ async function getNotifications(): Promise<NotificationsModule> {
       'Essens-Erinnerungen können nur in der Android- oder iOS-App aktiviert werden.',
     );
   }
-  if (isRunningInExpoGo()) {
-    throw new NotificationError(
-      'Essens-Erinnerungen benötigen einen Development Build. Die übrige App kann in Expo Go getestet werden.',
-    );
-  }
-  return import('expo-notifications');
+  return require('expo-notifications') as NotificationsModule;
 }
 
 async function readPersistedReminder(): Promise<PersistedReminder> {
@@ -140,8 +135,7 @@ export async function saveMealReminder(
   if (!settings.enabled) {
     if (
       previousIds.length > 0 &&
-      Platform.OS !== 'web' &&
-      !isRunningInExpoGo()
+      Platform.OS !== 'web'
     ) {
       const Notifications = await getNotifications();
       await Promise.all(
@@ -168,7 +162,6 @@ export async function saveMealReminder(
       title: 'Zeit für den Mensabär 🐻',
       body: 'Schau jetzt nach, was heute in deiner Mensa angeboten wird.',
       sound: 'default',
-      data: { screen: 'Speiseplan' },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
