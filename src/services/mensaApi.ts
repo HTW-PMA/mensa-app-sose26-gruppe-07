@@ -87,29 +87,6 @@ function selectStudentPrice(api: ApiMeal): number {
   return studentPrice?.price ?? api.prices?.[0]?.price ?? 0;
 }
 
-function buildCriteria(api: ApiMeal, price: number): string[] {
-  const criteria = new Set<string>();
-  const badgeNames = (api.badges ?? []).map((badge) => badge.name.toLowerCase());
-  const category = api.category?.toLowerCase() ?? '';
-
-  if (badgeNames.includes('vegan')) {
-    criteria.add('vegan');
-    criteria.add('vegetarisch');
-  } else if (badgeNames.includes('vegetarisch')) {
-    criteria.add('vegetarisch');
-  }
-  if (price > 0 && price <= 3) criteria.add('preiswert');
-  if (category.includes('salat')) {
-    criteria.add('leicht');
-    criteria.add('bunt');
-  }
-  if (!category.includes('salat') && !category.includes('dessert')) {
-    criteria.add('warm');
-  }
-
-  return [...criteria];
-}
-
 function mapMeal(
   api: ApiMeal,
   canteenId: string,
@@ -132,7 +109,6 @@ function mapMeal(
     menueName: category,
     badges: (api.badges ?? []).map((badge) => mapBadgeName(badge.name)),
     allergens: (api.additives ?? []).map((additive) => additive.text),
-    criteria: buildCriteria(api, price),
     waterBalance: api.waterBilanz,
     co2Balance: api.co2Bilanz,
   };

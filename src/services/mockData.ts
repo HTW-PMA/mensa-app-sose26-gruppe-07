@@ -39,7 +39,6 @@ export const MOCK_MEALS: Meal[] = [
     badges: ['Vegan', 'Bio', 'CO2-arm'],
     allergens: ['Weizen', 'Sellerie'],
     imageUrl: 'https://picsum.photos/seed/pasta/120/120',
-    criteria: ['warm', 'vegetarisch'],
   },
   {
     id: 'meal-2',
@@ -52,7 +51,6 @@ export const MOCK_MEALS: Meal[] = [
     badges: ['Vegan', 'CO2-arm'],
     allergens: [],
     imageUrl: 'https://picsum.photos/seed/bowl/120/120',
-    criteria: ['leicht', 'vegetarisch', 'bunt', 'preiswert'],
   },
   {
     id: 'meal-3',
@@ -65,7 +63,6 @@ export const MOCK_MEALS: Meal[] = [
     badges: ['Vegan'],
     allergens: ['Senf'],
     imageUrl: 'https://picsum.photos/seed/curry/120/120',
-    criteria: ['warm', 'leicht', 'vegetarisch', 'saettigend'],
   },
   {
     id: 'meal-4',
@@ -78,7 +75,6 @@ export const MOCK_MEALS: Meal[] = [
     badges: ['Vegetarisch', 'Bio'],
     allergens: ['Sellerie'],
     imageUrl: 'https://picsum.photos/seed/gemuese/120/120',
-    criteria: ['leicht', 'vegetarisch', 'bunt'],
   },
   {
     id: 'meal-5',
@@ -91,7 +87,6 @@ export const MOCK_MEALS: Meal[] = [
     badges: ['Vegetarisch'],
     allergens: ['Ei'],
     imageUrl: 'https://picsum.photos/seed/salat/80/80',
-    criteria: ['leicht', 'preiswert'],
   },
 ];
 
@@ -141,6 +136,7 @@ export const KI_FILTER_OPTIONS = [
   { label: 'Sättigend', icon: 'pizza-outline' as const },
   { label: 'Fleisch', icon: 'nutrition-outline' as const },
   { label: 'Bunt', icon: 'color-palette-outline' as const },
+  { label: 'Preiswert', icon: 'cash-outline' as const },
 ];
 
 export const CATEGORY_FILTERS = [

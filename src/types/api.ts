@@ -42,7 +42,6 @@ export interface Meal {
   allergens?: string[];
   imageUrl?: string;
   tags?: string[];
-  criteria?: string[];
   waterBalance?: number;
   co2Balance?: number;
 }

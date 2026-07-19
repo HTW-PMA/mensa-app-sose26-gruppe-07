@@ -52,7 +52,6 @@ function toPrologMeal(meal: Meal) {
     id: meal.id,
     name: meal.name,
     category: meal.category ?? '',
-    traits: meal.criteria ?? [],
     badges: meal.badges ?? [],
     additives: meal.allergens ?? [],
     price: meal.price,
