@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { LAYOUT } from '../../constants/layout';
@@ -27,22 +27,6 @@ export function DishCard({
   return (
     <View style={[styles.card, compact && styles.cardCompact]}>
       <View style={styles.mainRow}>
-        {meal.imageUrl ? (
-          <Image
-            source={{ uri: meal.imageUrl }}
-            style={[styles.image, compact && styles.imageCompact]}
-          />
-        ) : (
-          <View
-            style={[
-              styles.image,
-              styles.imagePlaceholder,
-              compact && styles.imageCompact,
-            ]}
-          >
-            <Ionicons name="restaurant-outline" size={24} color={COLORS.salbeigruen} />
-          </View>
-        )}
         <View style={styles.content}>
           <View style={styles.headerRow}>
             <Text style={styles.name} numberOfLines={compact ? 2 : 1}>
@@ -107,24 +91,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.salbeigruen,
   },
   cardCompact: {
     padding: 10,
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: LAYOUT.borderRadius.sm,
-    marginRight: 12,
-    backgroundColor: COLORS.creme,
-  },
-  imageCompact: {
-    width: 64,
-    height: 64,
-  },
-  imagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   mainRow: {
     flexDirection: 'row',

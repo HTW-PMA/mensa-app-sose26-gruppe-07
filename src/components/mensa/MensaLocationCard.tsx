@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { LAYOUT } from '../../constants/layout';
@@ -18,16 +18,14 @@ export function MensaLocationCard({
 }: MensaLocationCardProps) {
   return (
     <View style={styles.card}>
-      {canteen.imageUrl ? (
-        <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
-      ) : (
-        <View style={[styles.image, styles.imagePlaceholder]}>
-          <Ionicons name="location-outline" size={26} color={COLORS.salbeigruen} />
-        </View>
-      )}
       <View style={styles.content}>
         <Text style={styles.name}>{canteen.name}</Text>
-        {canteen.address ? <Text style={styles.address}>{canteen.address}</Text> : null}
+        {canteen.address ? (
+          <View style={styles.addressRow}>
+            <Ionicons name="location-outline" size={14} color={COLORS.salbeigruen} />
+            <Text style={styles.address}>{canteen.address}</Text>
+          </View>
+        ) : null}
         <View style={styles.statusRow}>
           {canteen.distance ? (
             <Text style={styles.meta}>{canteen.distance}</Text>
@@ -74,17 +72,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  image: {
-    width: 80,
-    height: 64,
-    borderRadius: LAYOUT.borderRadius.sm,
-    marginRight: 14,
-    backgroundColor: COLORS.creme,
-  },
-  imagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   content: {
     flex: 1,
   },
@@ -95,8 +82,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   address: {
+    flex: 1,
     fontSize: 11,
     color: COLORS.textMuted,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: 4,
   },
   statusRow: {

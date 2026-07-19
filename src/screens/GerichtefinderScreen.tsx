@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -205,17 +204,6 @@ export function GerichtefinderScreen() {
           >
             {isRecommended ? <View style={styles.accentBar} /> : null}
             <View style={styles.resultMainRow}>
-              {item.meal.imageUrl ? (
-                <Image source={{ uri: item.meal.imageUrl }} style={styles.resultImage} />
-              ) : (
-                <View style={[styles.resultImage, styles.resultImagePlaceholder]}>
-                  <Ionicons
-                    name="restaurant-outline"
-                    size={22}
-                    color={COLORS.salbeigruen}
-                  />
-                </View>
-              )}
               <View style={styles.resultContent}>
                 <View style={styles.resultTitleRow}>
                   <Text
@@ -366,18 +354,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 4,
     backgroundColor: COLORS.waldgruen,
-  },
-  resultImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    marginLeft: 4,
-    backgroundColor: COLORS.creme,
-  },
-  resultImagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   resultContent: {
     flex: 1,
