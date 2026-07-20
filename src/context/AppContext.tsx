@@ -12,6 +12,7 @@ import React, {
 
 interface AppContextValue {
   selectedCanteenId: string | null;
+  hasHydrated: boolean;
   setSelectedCanteenId: (id: string | null) => void;
 }
 
@@ -30,6 +31,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       .then((value) => {
         if (value && !hasLocalChanges.current) setSelectedCanteenIdState(value);
       })
+      .catch(() => undefined)
       .finally(() => setHasHydrated(true));
   }, []);
 
@@ -48,8 +50,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ selectedCanteenId, setSelectedCanteenId }),
-    [selectedCanteenId, setSelectedCanteenId],
+    () => ({ selectedCanteenId, hasHydrated, setSelectedCanteenId }),
+    [hasHydrated, selectedCanteenId, setSelectedCanteenId],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

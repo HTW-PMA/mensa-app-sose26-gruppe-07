@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { COLORS } from '../constants/colors';
@@ -26,10 +26,30 @@ const TAB_CONFIG: {
   iconActive: keyof typeof Ionicons.glyphMap;
 }[] = [
   { name: 'Home', label: 'Home', icon: 'home-outline', iconActive: 'home' },
-  { name: 'Speiseplan', label: 'Speiseplan', icon: 'restaurant-outline', iconActive: 'restaurant' },
-  { name: 'Favoriten', label: 'Favoriten', icon: 'star-outline', iconActive: 'star' },
-  { name: 'Gerichtefinder', label: 'Gerichtefinder', icon: 'paw-outline', iconActive: 'paw' },
-  { name: 'Profil', label: 'Profil', icon: 'person-outline', iconActive: 'person' },
+  {
+    name: 'Speiseplan',
+    label: 'Speiseplan',
+    icon: 'calendar-outline',
+    iconActive: 'calendar',
+  },
+  {
+    name: 'Favoriten',
+    label: 'Favoriten',
+    icon: 'heart-outline',
+    iconActive: 'heart',
+  },
+  {
+    name: 'Gerichtefinder',
+    label: 'Finder',
+    icon: 'sparkles-outline',
+    iconActive: 'sparkles',
+  },
+  {
+    name: 'Profil',
+    label: 'Mehr',
+    icon: 'settings-outline',
+    iconActive: 'settings',
+  },
 ];
 
 export function TabNavigator() {
@@ -38,31 +58,16 @@ export function TabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
         tabBarActiveTintColor: COLORS.waldgruen,
         tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarLabel: TAB_CONFIG.find((tab) => tab.name === route.name)?.label,
         tabBarIcon: ({ focused, color, size }) => {
           const config = TAB_CONFIG.find((tab) => tab.name === route.name);
           const iconName = focused
             ? (config?.iconActive ?? 'ellipse')
             : (config?.icon ?? 'ellipse-outline');
-          return (
-            <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-              <Ionicons name={iconName} size={size} color={color} />
-            </View>
-          );
-        },
-        tabBarLabel: ({ focused }) => {
-          const config = TAB_CONFIG.find((tab) => tab.name === route.name);
-          return (
-            <Text
-              style={[
-                styles.tabLabel,
-                focused ? styles.tabLabelActive : styles.tabLabelInactive,
-              ]}
-            >
-              {config?.label}
-            </Text>
-          );
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
@@ -80,26 +85,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopColor: COLORS.border,
     borderTopWidth: 1,
-    height: 64,
-    paddingBottom: 8,
-    paddingTop: 4,
-  },
-  tabIconContainer: {
-    padding: 4,
-    borderRadius: 8,
-  },
-  tabIconActive: {
-    backgroundColor: COLORS.creme,
   },
   tabLabel: {
     fontSize: 10,
-    marginTop: 2,
-  },
-  tabLabelActive: {
-    fontWeight: '700',
-    color: COLORS.waldgruen,
-  },
-  tabLabelInactive: {
-    color: COLORS.textMuted,
   },
 });

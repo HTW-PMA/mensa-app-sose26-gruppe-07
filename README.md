@@ -20,8 +20,6 @@ Gerichte durch einen separaten SWI-Prolog-Dienst empfehlen.
 
 - Node.js LTS
 - Docker Desktop oder SWI-Prolog 9+
-- gültiger Mensa-API-Key von
-  [mensa.gregorflachs.de/swaggerdoku](https://mensa.gregorflachs.de/swaggerdoku)
 - Android Studio für Android-Emulator/-Build oder Xcode für iOS
 
 ## Installation
@@ -32,16 +30,17 @@ cd mensa-app-sose26-gruppe-07
 npm install
 ```
 
-`.env.example` nach `.env` kopieren und den API-Key eintragen:
+`.env.example` nach `.env` kopieren. Die App benötigt nur die öffentliche URL
+des gemeinsamen Backends:
 
 ```dotenv
-EXPO_PUBLIC_MENSA_API_KEY=dein-api-key
-EXPO_PUBLIC_PROLOG_API_URL=http://localhost:4000
+EXPO_PUBLIC_APP_API_URL=http://localhost:4000
 ```
 
-Ohne gültigen API-Key kann beim ersten Start nichts geladen werden. Nach einem
-erfolgreichen Abruf stehen die gespeicherten Daten auch offline zur Verfügung.
-`.env` wird von Git ignoriert und darf nicht committet werden.
+Der Mensa-API-Key wird ausschließlich im Backend konfiguriert und gelangt nicht
+in das App-Bundle. Nach einem erfolgreichen Abruf stehen gespeicherte Daten auch
+offline zur Verfügung. `.env` wird von Git ignoriert und darf nicht committet
+werden.
 
 ## Prolog-Dienst starten
 
@@ -53,34 +52,36 @@ cd ../prolog-webserver-sose26-gruppe-07
 docker compose up -d --build
 ```
 
-Mit `http://localhost:4000/health` lässt sich prüfen, ob der Dienst läuft.
+Mit `http://localhost:4000/health` lässt sich prüfen, ob der Dienst läuft und
+`mensaApiConfigured` auf `true` steht. Vor einer Präsentation prüft
+`npm run presentation:check` zusätzlich einen echten Mensa-Abruf. Der Befehl
+gibt den API-Key niemals aus.
 
 Für Web und iOS-Simulator ist `http://localhost:4000` der Standard. Der
 Android-Emulator verwendet automatisch `http://10.0.2.2:4000`. Auf einem echten
-Gerät muss `EXPO_PUBLIC_PROLOG_API_URL` auf die im WLAN erreichbare IP des
+Gerät muss `EXPO_PUBLIC_APP_API_URL` auf die im WLAN erreichbare IP des
 Entwicklungsrechners oder auf einen gehosteten HTTPS-Dienst zeigen.
 
 ## App starten
 
-Zuerst im Android-Studio-Device-Manager einen Emulator starten. Danach im
-App-Repository:
+Für Notifications wird ein eigener Development Build verwendet. Expo Go ist
+für diesen Präsentationspfad nicht zuverlässig genug. Zuerst im
+Android-Studio-Device-Manager einen Emulator starten und einmalig bauen:
 
 ```bash
-npx expo start -c
+npm run android
 ```
 
-Mit `a` wird die App im laufenden Android-Emulator über Expo Go geöffnet; mit `w`
-startet die Web-Version. Die übrige App lässt sich in Expo Go testen, ohne dass
-`expo-notifications` beim Start abstürzt. Die Essens-Erinnerung bleibt
-dort deaktiviert und zeigt beim Aktivierungsversuch einen Hinweis.
-
-Um auch die lokale Essens-Erinnerung im Emulator zu testen, ist ein eigener
-Development Build nötig:
+Danach reicht, solange sich keine native Abhängigkeit ändert:
 
 ```bash
-npx expo install expo-dev-client
-npx expo run:android
+npm run presentation
 ```
+
+Der Präsentationsbefehl startet und prüft zuerst das Backend und öffnet danach
+Metro für den installierten Development Build. Unter `Mehr` löst
+`Test in 5 Sekunden` eine echte lokale Notification aus, ohne die tägliche
+Erinnerung zu verändern.
 
 Beim ersten Aktivieren fragt die App nach der Systemberechtigung. Remote Push
 Notifications sind nicht Teil dieses Stands; dafür wären zusätzlich EAS-Projekt-ID
@@ -90,6 +91,8 @@ sowie FCM-/APNs-Credentials erforderlich.
 
 ```bash
 npm run typecheck
+npm test
+npx expo-doctor
 npx expo install --check
 npx expo export --platform all
 ```
@@ -103,8 +106,8 @@ swipl -q -g run_tests -t halt tests/recommendation_engine_tests.pl
 ## Architektur
 
 ```text
-Mensa REST API -> mensaApi + AsyncStorage-Cache -> Hooks -> Screens
-Gerichtefinder -> recommendationService -> SWI-Prolog /recommend
+Mensa REST API -> Backend /api/* -> mensaApi + AsyncStorage-Cache -> Screens
+Gerichtefinder -> gemeinsames Backend -> SWI-Prolog /recommend
 Profil -> notificationService -> lokale Android-/iOS-Notification
 ```
 

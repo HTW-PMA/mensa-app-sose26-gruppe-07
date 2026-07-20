@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
 import { Meal } from '../types/api';
 import { CRITERIA_MAP } from './mockData';
+import { getBackendUrl } from './backendUrl';
 
 export interface ScoredMeal {
   mealId: string;
@@ -25,8 +25,6 @@ interface PrologResponse {
   engine: string;
 }
 
-const DEFAULT_PROLOG_URL =
-  Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
 const REQUEST_TIMEOUT_MS = 15_000;
 
 export class RecommendationError extends Error {
@@ -34,13 +32,6 @@ export class RecommendationError extends Error {
     super(message);
     this.name = 'RecommendationError';
   }
-}
-
-function getServiceUrl(): string {
-  return (
-    process.env.EXPO_PUBLIC_PROLOG_API_URL?.trim().replace(/\/$/, '') ||
-    DEFAULT_PROLOG_URL
-  );
 }
 
 function normalizePreferences(labels: string[]): string[] {
@@ -52,7 +43,6 @@ function toPrologMeal(meal: Meal) {
     id: meal.id,
     name: meal.name,
     category: meal.category ?? '',
-    traits: meal.criteria ?? [],
     badges: meal.badges ?? [],
     additives: meal.allergens ?? [],
     price: meal.price,
@@ -91,7 +81,7 @@ export async function scoreMeals(
   externalSignal?.addEventListener('abort', abortFromCaller);
 
   try {
-    const response = await fetch(`${getServiceUrl()}/recommend`, {
+    const response = await fetch(`${getBackendUrl()}/recommend`, {
       method: 'POST',
       signal: controller.signal,
       headers: {

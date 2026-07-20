@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/colors';
 import { LAYOUT } from '../../constants/layout';
@@ -27,13 +27,6 @@ export function MensaCard({
       onPress={onPress}
       style={[styles.card, isSelected && styles.cardSelected]}
     >
-      {canteen.imageUrl ? (
-        <Image source={{ uri: canteen.imageUrl }} style={styles.image} />
-      ) : (
-        <View style={[styles.image, styles.imagePlaceholder]}>
-          <Ionicons name="location-outline" size={24} color={COLORS.salbeigruen} />
-        </View>
-      )}
       <View style={styles.content}>
         <Text style={styles.name}>{canteen.name}</Text>
         {isSelected ? (
@@ -42,7 +35,12 @@ export function MensaCard({
             <Text style={styles.selectedText}>AUSGEWÄHLT</Text>
           </View>
         ) : null}
-        {canteen.address ? <Text style={styles.address}>{canteen.address}</Text> : null}
+        {canteen.address ? (
+          <View style={styles.addressRow}>
+            <Ionicons name="location-outline" size={14} color={COLORS.salbeigruen} />
+            <Text style={styles.address}>{canteen.address}</Text>
+          </View>
+        ) : null}
         <View style={styles.statusRow}>
           {canteen.distance ? (
             <Text style={styles.meta}>{canteen.distance}</Text>
@@ -101,20 +99,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     position: 'relative',
   },
-  image: {
-    width: 72,
-    height: 56,
-    borderRadius: LAYOUT.borderRadius.sm,
-    marginRight: 12,
-    backgroundColor: COLORS.creme,
-  },
   cardSelected: {
     borderColor: COLORS.waldgruen,
     borderWidth: 2,
-  },
-  imagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   content: {
     flex: 1,
@@ -144,8 +131,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   address: {
+    flex: 1,
     fontSize: 11,
     color: COLORS.textMuted,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: 4,
   },
   statusRow: {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -52,9 +53,11 @@ export function HomeScreen() {
     <ScreenContainer>
       <View style={styles.header}>
         <View style={styles.logoRow}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="paw" size={22} color={COLORS.white} />
-          </View>
+          <Image
+            source={require('../../assets/mensabaer-mark.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <View>
             <Text style={styles.appName}>Mensabär</Text>
             <View style={styles.locationRow}>
@@ -62,14 +65,6 @@ export function HomeScreen() {
               <Text style={styles.location}>Berlin</Text>
             </View>
           </View>
-        </View>
-        <View style={styles.bellContainer}>
-          <Ionicons
-            name="notifications-outline"
-            size={22}
-            color={COLORS.waldgruen}
-          />
-          <View style={styles.notificationDot} />
         </View>
       </View>
 
@@ -86,7 +81,11 @@ export function HomeScreen() {
 
       <View style={styles.heroCard}>
         <View style={styles.heroIcon}>
-          <Text style={styles.heroEmoji}>🐻‍🍳</Text>
+          <Image
+            source={require('../../assets/mensabaer-mark.png')}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.heroContent}>
           <Text style={styles.heroTitle}>
@@ -94,7 +93,7 @@ export function HomeScreen() {
             zu finden!
           </Text>
           <Text style={styles.heroSubtitle}>
-            Passende Gerichte basierend auf deinen Vorlieben und Allergien.
+            Passende Gerichte basierend auf deiner aktuellen Auswahl.
           </Text>
           <Pressable
             style={styles.heroButton}
@@ -167,13 +166,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  logoCircle: {
+  logoImage: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.waldgruen,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   appName: {
     fontSize: 20,
@@ -188,18 +183,6 @@ const styles = StyleSheet.create({
   location: {
     fontSize: 13,
     color: COLORS.textMuted,
-  },
-  bellContainer: {
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.salbeigruen,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -231,8 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroEmoji: {
-    fontSize: 48,
+  heroImage: {
+    width: 72,
+    height: 72,
   },
   heroContent: {
     flex: 1,

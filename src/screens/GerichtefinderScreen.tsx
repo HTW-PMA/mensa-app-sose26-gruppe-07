@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -28,15 +27,17 @@ import { getUpcomingDates } from '../utils/dates';
 export function GerichtefinderScreen() {
   const planningDates = useMemo(() => getUpcomingDates(), []);
   const [selectedDateIso, setSelectedDateIso] = useState(planningDates[0].iso);
-  const { selectedCanteenId, setSelectedCanteenId } = useAppState();
+  const { selectedCanteenId, hasHydrated: hasAppStateHydrated, setSelectedCanteenId } =
+    useAppState();
   const {
     canteens,
     loading: canteensLoading,
     error: canteensError,
     reload: reloadCanteens,
   } = useCanteens();
-  const selectedCanteen =
-    canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0];
+  const selectedCanteen = hasAppStateHydrated
+    ? canteens.find((canteen) => canteen.id === selectedCanteenId) ?? canteens[0]
+    : undefined;
   const selectedDate =
     planningDates.find((date) => date.iso === selectedDateIso) ?? planningDates[0];
   const {
@@ -45,7 +46,7 @@ export function GerichtefinderScreen() {
     error: mealsError,
     reload: reloadMeals,
   } = useMeals(
-    selectedCanteen?.id ?? null,
+    hasAppStateHydrated ? selectedCanteen?.id ?? null : null,
     selectedDate.iso,
   );
   const { selectedFilters, hasHydrated, toggleFilter, resetFilters } = usePreferences();
@@ -57,10 +58,19 @@ export function GerichtefinderScreen() {
   const topScore = scoredMeals[0]?.score ?? 0;
 
   useEffect(() => {
-    if (selectedCanteen && selectedCanteen.id !== selectedCanteenId) {
+    if (
+      hasAppStateHydrated &&
+      selectedCanteen &&
+      selectedCanteen.id !== selectedCanteenId
+    ) {
       setSelectedCanteenId(selectedCanteen.id);
     }
-  }, [selectedCanteen, selectedCanteenId, setSelectedCanteenId]);
+  }, [
+    hasAppStateHydrated,
+    selectedCanteen,
+    selectedCanteenId,
+    setSelectedCanteenId,
+  ]);
 
   useEffect(() => {
     if (!hasHydrated || mealsLoading || mealsError || meals.length === 0) {
@@ -92,7 +102,11 @@ export function GerichtefinderScreen() {
     return () => controller.abort();
   }, [hasHydrated, meals, mealsError, mealsLoading, retryCount, selectedFilters]);
 
-  const loading = canteensLoading || mealsLoading || recommendationLoading;
+  const loading =
+    !hasAppStateHydrated ||
+    canteensLoading ||
+    mealsLoading ||
+    recommendationLoading;
   const error = canteensError ?? mealsError ?? recommendationError;
 
   const retry = () => {
@@ -190,17 +204,6 @@ export function GerichtefinderScreen() {
           >
             {isRecommended ? <View style={styles.accentBar} /> : null}
             <View style={styles.resultMainRow}>
-              {item.meal.imageUrl ? (
-                <Image source={{ uri: item.meal.imageUrl }} style={styles.resultImage} />
-              ) : (
-                <View style={[styles.resultImage, styles.resultImagePlaceholder]}>
-                  <Ionicons
-                    name="restaurant-outline"
-                    size={22}
-                    color={COLORS.salbeigruen}
-                  />
-                </View>
-              )}
               <View style={styles.resultContent}>
                 <View style={styles.resultTitleRow}>
                   <Text
@@ -351,18 +354,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: 4,
     backgroundColor: COLORS.waldgruen,
-  },
-  resultImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    marginLeft: 4,
-    backgroundColor: COLORS.creme,
-  },
-  resultImagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   resultContent: {
     flex: 1,

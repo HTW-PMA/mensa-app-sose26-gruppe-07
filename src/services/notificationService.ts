@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isRunningInExpoGo } from 'expo';
 import { Platform } from 'react-native';
 
 type NotificationsModule = typeof import('expo-notifications');
@@ -24,6 +23,17 @@ const DEFAULT_SETTINGS: MealReminderSettings = {
   minute: 30,
 };
 
+function isValidTime(hour: number, minute: number): boolean {
+  return (
+    Number.isInteger(hour) &&
+    hour >= 0 &&
+    hour <= 23 &&
+    Number.isInteger(minute) &&
+    minute >= 0 &&
+    minute <= 59
+  );
+}
+
 export class NotificationError extends Error {
   constructor(message: string) {
     super(message);
@@ -32,20 +42,21 @@ export class NotificationError extends Error {
 }
 
 export function configureNotificationHandling(): void {
-  if (Platform.OS === 'web' || isRunningInExpoGo()) return;
+  if (Platform.OS === 'web') return;
 
-  void import('expo-notifications')
-    .then((Notifications) => {
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowBanner: true,
-          shouldShowList: true,
-          shouldPlaySound: true,
-          shouldSetBadge: false,
-        }),
-      });
-    })
-    .catch(() => undefined);
+  try {
+    const Notifications = require('expo-notifications') as NotificationsModule;
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  } catch {
+    // Keep the rest of the app usable if notifications are unavailable.
+  }
 }
 
 async function getNotifications(): Promise<NotificationsModule> {
@@ -54,12 +65,7 @@ async function getNotifications(): Promise<NotificationsModule> {
       'Essens-Erinnerungen können nur in der Android- oder iOS-App aktiviert werden.',
     );
   }
-  if (isRunningInExpoGo()) {
-    throw new NotificationError(
-      'Essens-Erinnerungen benötigen einen Development Build. Die übrige App kann in Expo Go getestet werden.',
-    );
-  }
-  return import('expo-notifications');
+  return require('expo-notifications') as NotificationsModule;
 }
 
 async function readPersistedReminder(): Promise<PersistedReminder> {
@@ -72,9 +78,8 @@ async function readPersistedReminder(): Promise<PersistedReminder> {
     if (
       typeof value.enabled !== 'boolean' ||
       typeof hour !== 'number' ||
-      !Number.isInteger(hour) ||
       typeof minute !== 'number' ||
-      !Number.isInteger(minute)
+      !isValidTime(hour, minute)
     ) {
       return DEFAULT_SETTINGS;
     }
@@ -117,15 +122,38 @@ async function ensurePermission(Notifications: NotificationsModule): Promise<voi
   }
 }
 
+async function ensureAndroidChannel(Notifications: NotificationsModule): Promise<void> {
+  if (Platform.OS !== 'android') return;
+
+  await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
+    name: 'Essens-Erinnerungen',
+    description: 'Tägliche Erinnerung an den aktuellen Mensa-Speiseplan',
+    importance: Notifications.AndroidImportance.DEFAULT,
+  });
+}
+
+export async function scheduleTestNotification(): Promise<void> {
+  const Notifications = await getNotifications();
+  await ensureAndroidChannel(Notifications);
+  await ensurePermission(Notifications);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Mensabär-Test erfolgreich 🐻',
+      body: 'Lokale Benachrichtigungen funktionieren auf diesem Gerät.',
+      sound: 'default',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 5,
+      repeats: false,
+      channelId: Platform.OS === 'android' ? CHANNEL_ID : undefined,
+    },
+  });
+}
+
 function validateTime(hour: number, minute: number): void {
-  if (
-    !Number.isInteger(hour) ||
-    hour < 0 ||
-    hour > 23 ||
-    !Number.isInteger(minute) ||
-    minute < 0 ||
-    minute > 59
-  ) {
+  if (!isValidTime(hour, minute)) {
     throw new NotificationError('Die Erinnerungszeit ist ungültig.');
   }
 }
@@ -140,8 +168,7 @@ export async function saveMealReminder(
   if (!settings.enabled) {
     if (
       previousIds.length > 0 &&
-      Platform.OS !== 'web' &&
-      !isRunningInExpoGo()
+      Platform.OS !== 'web'
     ) {
       const Notifications = await getNotifications();
       await Promise.all(
@@ -153,14 +180,7 @@ export async function saveMealReminder(
   }
 
   const Notifications = await getNotifications();
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Essens-Erinnerungen',
-      description: 'Tägliche Erinnerung an den aktuellen Mensa-Speiseplan',
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-  }
+  await ensureAndroidChannel(Notifications);
   await ensurePermission(Notifications);
 
   const notificationId = await Notifications.scheduleNotificationAsync({
@@ -168,7 +188,6 @@ export async function saveMealReminder(
       title: 'Zeit für den Mensabär 🐻',
       body: 'Schau jetzt nach, was heute in deiner Mensa angeboten wird.',
       sound: 'default',
-      data: { screen: 'Speiseplan' },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,

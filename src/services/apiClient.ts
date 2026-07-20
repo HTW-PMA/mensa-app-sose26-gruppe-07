@@ -1,4 +1,4 @@
-const BASE_URL = 'https://mensa.gregorflachs.de/api/v1';
+import { getBackendUrl } from './backendUrl';
 
 export class ApiError extends Error {
   constructor(
@@ -10,29 +10,33 @@ export class ApiError extends Error {
   }
 }
 
-function getApiKey(): string | undefined {
-  return process.env.EXPO_PUBLIC_MENSA_API_KEY?.trim();
-}
-
-export function hasApiKey(): boolean {
-  const key = getApiKey();
-  return Boolean(
-    key && !['api-key-hier', 'dein-api-key-hier'].includes(key.toLowerCase()),
-  );
-}
-
 function getErrorMessage(status: number, body?: string): string {
+  if (body) {
+    try {
+      const payload: unknown = JSON.parse(body);
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        typeof (payload as { error?: unknown }).error === 'string'
+      ) {
+        return (payload as { error: string }).error;
+      }
+    } catch {
+      // Non-JSON responses use the status-specific fallback below.
+    }
+  }
+
   switch (status) {
     case 401:
-      return 'API-Key fehlt. Bitte in der .env-Datei konfigurieren.';
+      return 'Der App-Dienst ist nicht für die Mensa-API konfiguriert.';
     case 403:
-      return 'Ungültiger API-Key.';
+      return 'Der Zugriff auf die Mensa-API wurde abgelehnt.';
     case 404:
       return 'Die angeforderten Daten wurden nicht gefunden.';
     case 429:
       return 'Zu viele Anfragen. Bitte später erneut versuchen.';
     default:
-      return body || 'Ein unbekannter Fehler ist aufgetreten.';
+      return 'Der App-Dienst ist vorübergehend nicht verfügbar.';
   }
 }
 
@@ -40,15 +44,7 @@ export async function apiGet<T>(
   endpoint: string,
   params?: Record<string, string>,
 ): Promise<T> {
-  const apiKey = getApiKey();
-
-  if (!hasApiKey() || !apiKey) {
-    throw new ApiError(
-      'Kein Mensa-API-Key konfiguriert. Bitte EXPO_PUBLIC_MENSA_API_KEY in .env setzen.',
-    );
-  }
-
-  const url = new URL(`${BASE_URL}${endpoint}`);
+  const url = new URL(`${getBackendUrl()}/api${endpoint}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
@@ -65,7 +61,6 @@ export async function apiGet<T>(
       method: 'GET',
       signal: controller.signal,
       headers: {
-        'X-API-KEY': apiKey,
         Accept: 'application/json',
       },
     });
